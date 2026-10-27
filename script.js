@@ -313,7 +313,7 @@ document.querySelectorAll(".copy-btn").forEach((btn) => {
 
 /* --- 9. RSVP & BUKU TAMU (Google Sheets via Apps Script) --- */
 /* Ganti dengan URL Web App dari Google Apps Script (Deploy → Web app). */
-const API_URL = "https://script.google.com/macros/s/AKfycbyYqJmI3H6gLbGTN-dmAlXpC2HPrjjZBJ4m0e-QcBRSUwY23pq6e2N6LoA6BovdWsFBdA/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxYMrAXB2rk9aIDWIXvWJ74y34oUO7w7QDHHD055lCI/exec";
 const API_READY = !!API_URL && !API_URL.startsWith("ISI_");
 const MAX_MESSAGES = 50;
 const REFRESH_MS = 60000;
