@@ -1,6 +1,6 @@
 /* =========================================================
-WEDDING INVITATION — ANA THASYA & FAJAR
-========================================================= */
+   WEDDING INVITATION — ANA THASYA & FAJAR
+   ========================================================= */
 
 /* --- 1. NAMA TAMU DARI URL (?to=Nama) --- */
 const params = new URLSearchParams(window.location.search);
@@ -46,8 +46,8 @@ window.addEventListener("load", () => {
 
 /* --- 5. MUSIK (ingat posisi & status saat pengunjung kembali) --- */
 const MUSIC_KEY = "anaThasyaMusic";
-let pendingResume = false;      // musik terakhir diputar, tapi belum bisa dimulai tanpa interaksi
-let resumeAfterVisible = false; // musik sedang diputar ketika tab/aplikasi disembunyikan
+let pendingResume = false;
+let resumeAfterVisible = false;
 let lastSave = 0;
 
 function setMusicState(playing) {
@@ -74,7 +74,6 @@ function saveMusic() {
   lastSave = Date.now();
 }
 
-// Mulai musik dari posisi terakhir. Dipanggil hanya setelah interaksi pengguna.
 function startMusic() {
   if (!music) return Promise.reject(new Error("no audio"));
   const saved = loadMusic();
@@ -92,7 +91,6 @@ function startMusic() {
     .catch(() => setMusicState(false));
 }
 
-// Saat pertama kali ada interaksi (sentuh/klik/tombol), lanjutkan musik yang tertunda.
 function armResume() {
   const resumeOnGesture = () => {
     document.removeEventListener("pointerdown", resumeOnGesture);
@@ -116,7 +114,13 @@ function armResume() {
 if (openBtn) {
   openBtn.addEventListener("click", () => {
     if (cover) cover.classList.add("hide-cover");
+    
+    // 1. Munculkan pemutar musik
+    if (musicPlayer) musicPlayer.classList.add("is-active");
+    
+    // 2. Mulai musik
     startMusic();
+
     setTimeout(() => {
       if (cover) cover.style.display = "none";
       if (invitation) invitation.classList.remove("hidden");
@@ -150,7 +154,6 @@ if (music) {
   window.addEventListener("pagehide", saveMusic);
   window.addEventListener("beforeunload", saveMusic);
 
-  // Saat tab/aplikasi disembunyikan, musik dijeda; saat kembali, musik diputar lagi jika sebelumnya berputar.
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) {
       if (!music.paused) {
@@ -166,8 +169,8 @@ if (music) {
 
 /* --- 6. HITUNG MUNDUR --- */
 (function initCountdown() {
-  const TARGET = new Date("2026-12-04T13:30:00+07:00").getTime();   // waktu Akad Nikah
-  const START = new Date("2026-01-01T00:00:00+07:00").getTime();    // acuan awal ring "Hari"
+  const TARGET = new Date("2026-12-04T13:30:00+07:00").getTime();
+  const START = new Date("2026-01-01T00:00:00+07:00").getTime();
   const SPAN = Math.max(1, TARGET - START);
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -177,7 +180,7 @@ if (music) {
   const pad = (n) => String(n).padStart(2, "0");
 
   const units = [
-    { key: "days", size: 0 },      // size 0 = dihitung dari rentang START -> TARGET
+    { key: "days", size: 0 },
     { key: "hours", size: 24 },
     { key: "minutes", size: 60 },
     { key: "seconds", size: 60 }
@@ -204,7 +207,6 @@ if (music) {
     }
     if (unit.bar) {
       frac = Math.min(1, Math.max(0, frac));
-      // ring kembali penuh (mis. detik 0 -> 59): lewati transisi agar tidak berputar mundur
       const wrapped = unit.frac !== null && frac > unit.frac + 0.0001;
       if (wrapped) unit.bar.style.transition = "none";
       unit.bar.style.strokeDashoffset = (100 * (1 - frac)).toFixed(2);
@@ -269,7 +271,6 @@ if (music) {
   const dtEnd = toUTC(end);
   const escapeICS = (text) => text.replace(/\\/g, "\\\\").replace(/([;,])/g, "\\$1").replace(/\n/g, "\\n");
 
-  // Lipat baris >75 karakter sesuai RFC 5545 agar terbaca di semua aplikasi kalender
   function fold(line) {
     const parts = [];
     while (line.length > 74) {
@@ -315,7 +316,6 @@ if (music) {
     const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     if (isIOS) {
-      // Safari iOS: membuka file .ics langsung memunculkan dialog "Tambah ke Kalender"
       window.location.href = url;
       setTimeout(() => URL.revokeObjectURL(url), 15000);
       return;
@@ -393,7 +393,7 @@ const feedbackEl = document.getElementById("rsvpFeedback");
 let feedbackTimer = null;
 
 let savedMessages = [];
-let loadState = "loading"; // loading | ready | error
+let loadState = "loading";
 
 function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => ({
@@ -424,14 +424,12 @@ function nameSeed(name) {
 const AVATAR_SKIN = ["#f8dcc6", "#f0c6a2", "#dea47d", "#bd8458", "#8f5b3b"];
 const AVATAR_HAIR = ["#2a1c14", "#4b3121", "#1f1b1b", "#6e4a2c"];
 
-// Avatar gaya boneka (chibi): kepala besar, mata bulat berkilap, pipi merona.
-// Warna dan gaya ditentukan dari nama, sehingga tampilannya tetap sama setiap kali dibuka.
 function avatarSvg(name) {
   const h = nameHue(name);
   const seed = nameSeed(name);
   const skin = AVATAR_SKIN[seed % AVATAR_SKIN.length];
   const hair = AVATAR_HAIR[(seed >>> 4) % AVATAR_HAIR.length];
-  const style = (seed >>> 8) % 5; // 0 hijab, 1 rambut panjang, 2 rambut pendek, 3 pendek berkacamata, 4 ikal
+  const style = (seed >>> 8) % 5;
   const bg = "hsl(" + h + " 40% 92%)";
   const cloth = "hsl(" + h + " 40% 46%)";
   const clothDark = "hsl(" + h + " 40% 32%)";
@@ -586,7 +584,6 @@ async function loadMessages() {
     savedMessages = data.messages.slice(0, MAX_MESSAGES);
     loadState = "ready";
   } catch (err) {
-    // pertahankan daftar yang sudah tampil; hanya tandai error jika belum ada data
     if (!savedMessages.length) loadState = "error";
   }
   renderMessages();
@@ -617,7 +614,6 @@ if (form) {
     try {
       const res = await fetch(API_URL, {
         method: "POST",
-        // text/plain menghindari preflight CORS pada Apps Script
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(entry)
       });
@@ -769,7 +765,6 @@ initGallerySliders();
     }
   }, { passive: true });
 
-  // Cahaya bloom yang mekar dari tombol, lalu percikan kecil yang menyebar
   function bloomAt(x, y) {
     const size = Math.round(Math.min(Math.max(window.innerWidth * 0.6, 200), 280));
 
@@ -807,8 +802,6 @@ initGallerySliders();
     }
   }
 
-  // Gulir ke atas dengan kurva smootherstep: kecepatan dan percepatan nol di awal dan akhir.
-  // Durasi menyesuaikan jarak. Berhenti jika pengunjung menggulir, menyentuh, atau menekan tombol.
   function smoothScrollToTop() {
     const startY = window.scrollY;
     if (startY <= 0) return;
@@ -835,7 +828,6 @@ initGallerySliders();
 
     function step(now) {
       if (!active) return;
-      // Posisi berubah di luar animasi (misalnya seret scrollbar): hentikan.
       if (Math.abs(window.scrollY - expectedY) > 3) { stop(); return; }
       const t = Math.min((now - startTime) / duration, 1);
       expectedY = startY * (1 - smootherstep(t));

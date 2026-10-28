@@ -1,6 +1,6 @@
 /* =========================================================
-WEDDING INVITATION — ANA THASYA & FAJAR
-========================================================= */
+   WEDDING INVITATION — ANA THASYA & FAJAR
+   ========================================================= */
 
 /* --- 1. RESET & VARIABEL --- */
 *, *::before, *::after { box-sizing: border-box; }
@@ -1130,6 +1130,37 @@ textarea { height: 120px; resize: vertical; }
 
 .music-bars { display: flex; gap: 3px; height: 20px; }
 .music-bars i { width: 2px; border-radius: 2px; background: linear-gradient(to top, #a98b6b, #e6cb9f); }
+
+/* --- 26. PEMUTAR MUSIK: tersembunyi sampai undangan dibuka --- */
+.music-player {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(16px);
+  transition: opacity .6s ease, transform .6s cubic-bezier(.22, 1, .36, 1), visibility .6s;
+}
+.music-player.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+}
+
+/* --- 27. OPTIMASI PERFORMA HP (iOS & Android) --- */
+@media (hover: none), (pointer: coarse) {
+  .page, .cover, .thank-you { background-attachment: scroll; }
+  .music-player, .to-top {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgba(255, 252, 247, .97);
+  }
+  .reveal, .reveal-on-scroll,
+  .reveal-on-scroll.is-visible,
+  .reveal.active { filter: none; }
+  .thank-you-bg { mix-blend-mode: normal; }
+  .decor-border { animation: none; }
+  .decor-sticker { animation-duration: 10s; }
+}
 
 /* ---------- Tombol ke atas ---------- */
 .to-top {
