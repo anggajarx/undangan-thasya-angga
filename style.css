@@ -737,6 +737,7 @@ textarea { height: 120px; resize: vertical; }
   filter: brightness(0.6) contrast(1.1) grayscale(0.2);
   opacity: 0.85; mix-blend-mode: luminosity;
   -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%);
 }
 .thank-you::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle, rgba(70, 58, 49, 0.7) 0%, rgba(70, 58, 49, 0.9) 100%); z-index: 1; pointer-events: none; }
@@ -760,6 +761,7 @@ textarea { height: 120px; resize: vertical; }
   border-radius: 30px;
   background: rgba(250, 246, 240, .94);
   box-shadow: 0 12px 32px rgba(50, 40, 30, .12);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 .music-btn {
@@ -1010,3 +1012,185 @@ textarea { height: 120px; resize: vertical; }
 
 /* --- 22. ALAMAT LOKASI ACARA --- */
 .venue-card .venue-address { margin: 0 0 22px; font-style: normal; font-size: 14px; line-height: 1.75; color: var(--muted); }
+
+/* --- 23. TOMBOL KE ATAS --- */
+.to-top {
+  position: fixed; z-index: 90;
+  left: max(18px, env(safe-area-inset-left, 0px)); bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 6px 16px 6px 6px; border-radius: 999px;
+  border: 1px solid rgba(169, 139, 107, .35);
+  background: rgba(255, 250, 244, .92);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: 0 14px 30px -16px rgba(62, 48, 37, .5), inset 0 1px 0 #fff;
+  color: var(--ink); font-family: var(--sans); font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+  cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(14px) scale(.94);
+  transition: opacity .35s ease, transform .4s cubic-bezier(.2, .8, .2, 1), visibility .35s, border-color .25s, color .25s;
+}
+.to-top.is-visible { opacity: 1; visibility: visible; pointer-events: auto; transform: none; }
+.to-top-icon {
+  display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(160deg, #433829, #2b231c); color: #f7efe5;
+  box-shadow: 0 8px 16px -8px rgba(45, 36, 29, .8);
+  transition: transform .3s ease;
+}
+.to-top:hover { border-color: var(--gold); color: var(--gold); }
+.to-top:hover .to-top-icon { transform: translateY(-2px); }
+.to-top:active { transform: scale(.96); }
+.to-top:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+@media (max-width: 700px) {
+  .to-top { padding: 5px 13px 5px 5px; font-size: 9px; letter-spacing: .14em; }
+  .to-top-icon { width: 28px; height: 28px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .to-top, .to-top-icon { transition: none; }
+}
+
+/* --- 24. EFEK BLOOM SAAT KEMBALI KE ATAS --- */
+.top-bloom {
+  position: fixed; z-index: 95; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 250, 240, .95) 0%, rgba(240, 214, 180, .6) 28%, rgba(217, 185, 143, .28) 52%, rgba(217, 185, 143, 0) 70%);
+  will-change: transform, opacity;
+}
+.top-spark {
+  position: fixed; z-index: 96; pointer-events: none; width: 9px; height: 9px; border-radius: 50%;
+  background: radial-gradient(circle, #fffaf0 0%, #d9b98f 55%, rgba(217, 185, 143, 0) 75%);
+  box-shadow: 0 0 8px rgba(217, 185, 143, .8); will-change: transform, opacity;
+}
+
+/* =========================================================
+   25. REDESAIN: PEMUTAR MUSIK & TOMBOL KE ATAS
+   Gaya kaca (glass), border gradasi emas, aman untuk Android & iOS
+========================================================= */
+@property --ang { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes borderSpin { to { --ang: 360deg; } }
+@keyframes ringPulse { 0% { transform: scale(.92); opacity: .75; } 100% { transform: scale(1.4); opacity: 0; } }
+
+/* ---------- Pemutar musik ---------- */
+.music-player {
+  right: max(16px, env(safe-area-inset-right, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  gap: 12px;
+  padding: 6px 18px 6px 6px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 252, 247, .86), rgba(246, 238, 227, .74));
+  box-shadow: 0 20px 40px -18px rgba(62, 48, 37, .55), 0 2px 8px rgba(62, 48, 37, .08), inset 0 1px 0 rgba(255, 255, 255, .95);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  transform: translateZ(0);
+}
+.music-player::before {
+  content: ""; position: absolute; inset: 0; padding: 1px; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(135deg, #d9bb90 0%, #fffaf0 36%, rgba(169, 139, 107, .45) 62%, #d9bb90 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.music-player.playing::before {
+  background: conic-gradient(from var(--ang), #d9bb90, #fffaf0, #a98b6b, #f0d6a8, #d9bb90);
+  animation: borderSpin 6s linear infinite;
+}
+
+.music-btn {
+  flex: 0 0 44px; width: 44px; height: 44px;
+  border: 0; border-radius: 50%;
+  background: #2b2018; color: #d9c3a3;
+  box-shadow: 0 8px 16px -8px rgba(45, 36, 29, .85), inset 0 0 0 1px rgba(255, 255, 255, .08);
+  cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  transition: color .35s ease, box-shadow .35s ease, transform .25s ease;
+}
+.music-btn::before {
+  content: ""; position: absolute; inset: 0; border-radius: 50%;
+  background:
+    repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, .07) 0 1px, transparent 1px 3px),
+    conic-gradient(from 20deg, #2b2018, #4c3c2e 18%, #2b2018 34%, #3d3025 58%, #2b2018 78%, #4c3c2e 92%, #2b2018);
+}
+.music-btn::after {
+  content: ""; position: absolute; inset: -3px; border-radius: 50%;
+  border: 1px solid rgba(224, 181, 103, .75); opacity: 0; pointer-events: none;
+}
+.music-btn span { position: relative; z-index: 1; font-size: 17px; }
+.music-btn:active { transform: scale(.94); }
+.music-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.music-btn.playing {
+  color: #f6dca6; background: #2b2018; border: 0;
+  box-shadow: 0 0 0 1px rgba(224, 181, 103, .55), 0 0 20px rgba(224, 181, 103, .35), 0 8px 16px -8px rgba(45, 36, 29, .85);
+}
+.music-btn.playing::before { animation: spin 5s linear infinite; }
+.music-btn.playing::after { animation: ringPulse 2.4s ease-out infinite; }
+.music-btn.playing span { animation: none; text-shadow: 0 0 10px rgba(255, 217, 138, .8); }
+
+.music-info { gap: 3px; min-width: 104px; }
+.music-info small { font-family: var(--sans); font-size: 8px; font-weight: 600; letter-spacing: .28em; color: var(--gold); }
+.music-info strong { font-size: 15px; font-weight: 500; letter-spacing: .01em; color: var(--ink); }
+.music-player.playing .music-info strong { color: #8a5f24; }
+
+.music-bars { display: flex; gap: 3px; height: 20px; }
+.music-bars i { width: 2px; border-radius: 2px; background: linear-gradient(to top, #a98b6b, #e6cb9f); }
+
+/* ---------- Tombol ke atas ---------- */
+.to-top {
+  left: max(16px, env(safe-area-inset-left, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  gap: 10px;
+  padding: 6px 18px 6px 6px;
+  border: 0;
+  background: linear-gradient(135deg, rgba(255, 252, 247, .86), rgba(246, 238, 227, .74));
+  box-shadow: 0 20px 40px -18px rgba(62, 48, 37, .55), 0 2px 8px rgba(62, 48, 37, .08), inset 0 1px 0 rgba(255, 255, 255, .95);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  backdrop-filter: blur(16px) saturate(1.3);
+  font-size: 10px; letter-spacing: .26em; color: var(--ink);
+  transform: translateY(18px) scale(.9);
+  transition: opacity .45s ease, transform .55s cubic-bezier(.22, 1, .36, 1), visibility .45s;
+  will-change: transform, opacity;
+}
+.to-top.is-visible { transform: translateZ(0); }
+.to-top::before {
+  content: ""; position: absolute; inset: 0; padding: 1px; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(135deg, #d9bb90 0%, #fffaf0 36%, rgba(169, 139, 107, .45) 62%, #d9bb90 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.to-top-icon {
+  position: relative; width: 36px; height: 36px;
+  background: conic-gradient(#e6cb9f calc(var(--p, 0) * 1%), rgba(169, 139, 107, .28) 0);
+  box-shadow: 0 8px 16px -8px rgba(45, 36, 29, .8);
+}
+.to-top-icon::before {
+  content: ""; position: absolute; inset: 3px; border-radius: 50%;
+  background: linear-gradient(160deg, #483c2d, #2b231c);
+}
+.to-top-icon svg { position: relative; z-index: 1; transition: transform .35s cubic-bezier(.22, 1, .36, 1); }
+.to-top:hover { color: var(--ink); border-color: transparent; }
+.to-top:hover .to-top-icon { transform: none; }
+@media (hover: hover) {
+  .to-top:hover { color: #8a5f24; }
+  .to-top:hover .to-top-icon svg { transform: translateY(-2px); }
+}
+.to-top:active { transform: scale(.95); }
+
+/* ---------- Ponsel ---------- */
+@media (max-width: 700px) {
+  .music-player { right: max(12px, env(safe-area-inset-right, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); gap: 10px; padding: 5px 14px 5px 5px; }
+  .music-info { min-width: 86px; }
+  .music-info strong { font-size: 14px; }
+  .music-bars { display: flex; height: 18px; }
+  .to-top { left: max(12px, env(safe-area-inset-left, 0px)); bottom: max(12px, env(safe-area-inset-bottom, 0px)); gap: 8px; padding: 5px 14px 5px 5px; font-size: 9px; letter-spacing: .2em; }
+  .to-top-icon { width: 34px; height: 34px; }
+}
+@media (max-width: 359px) {
+  .music-bars { display: none; }
+  .music-info { min-width: 74px; }
+  .to-top { padding: 5px; }
+  .to-top-label { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .music-player.playing::before, .music-btn.playing::before, .music-btn.playing::after { animation: none; }
+  .to-top { transition: opacity .2s ease, visibility .2s; }
+}

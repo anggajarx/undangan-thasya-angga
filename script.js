@@ -742,3 +742,122 @@ initGallerySliders();
   }, { threshold: 0, rootMargin: "100px 0px" });
   pages.forEach((el) => stickerObserver.observe(el));
 })();
+
+/* --- 12. TOMBOL KE ATAS (dengan efek bloom) --- */
+(function initToTop() {
+  const btn = document.getElementById("toTopBtn");
+  if (!btn) return;
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const canAnimate = typeof Element !== "undefined" && typeof Element.prototype.animate === "function";
+  let ticking = false;
+
+  function update() {
+    ticking = false;
+    const invitation = document.getElementById("invitation");
+    const opened = !!invitation && !invitation.classList.contains("hidden");
+    const show = opened && window.scrollY > window.innerHeight * 0.8;
+    btn.classList.toggle("is-visible", show);
+    const maxY = document.documentElement.scrollHeight - window.innerHeight;
+    const progress = maxY > 0 ? Math.min(100, Math.max(0, (window.scrollY / maxY) * 100)) : 0;
+    btn.style.setProperty("--p", progress.toFixed(1));
+  }
+
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      ticking = true;
+      requestAnimationFrame(update);
+    }
+  }, { passive: true });
+
+  // Cahaya bloom yang mekar dari tombol, lalu percikan kecil yang menyebar
+  function bloomAt(x, y) {
+    const size = Math.round(Math.min(Math.max(window.innerWidth * 0.6, 200), 280));
+
+    const glow = document.createElement("div");
+    glow.className = "top-bloom";
+    glow.style.width = size + "px";
+    glow.style.height = size + "px";
+    glow.style.left = (x - size / 2) + "px";
+    glow.style.top = (y - size / 2) + "px";
+    document.body.appendChild(glow);
+    const glowAnim = glow.animate([
+      { transform: "scale(.2)", opacity: 0 },
+      { transform: "scale(1)", opacity: 1, offset: 0.35 },
+      { transform: "scale(1.9)", opacity: 0 }
+    ], { duration: 1200, easing: "cubic-bezier(.2,.8,.2,1)", fill: "forwards" });
+    glowAnim.onfinish = () => glow.remove();
+
+    const SPARKS = 9;
+    for (let i = 0; i < SPARKS; i++) {
+      const spark = document.createElement("span");
+      spark.className = "top-spark";
+      spark.style.left = x + "px";
+      spark.style.top = y + "px";
+      document.body.appendChild(spark);
+      const angle = (Math.PI * 2 * i) / SPARKS + Math.random() * 0.5;
+      const dist = 70 + Math.random() * 90;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const sparkAnim = spark.animate([
+        { transform: "translate(-50%, -50%) scale(.2)", opacity: 0 },
+        { transform: "translate(calc(-50% + " + dx * 0.5 + "px), calc(-50% + " + dy * 0.5 + "px)) scale(1)", opacity: 1, offset: 0.4 },
+        { transform: "translate(calc(-50% + " + dx + "px), calc(-50% + " + dy + "px)) scale(.3)", opacity: 0 }
+      ], { duration: 1000 + Math.random() * 300, delay: Math.random() * 120, easing: "cubic-bezier(.2,.7,.3,1)", fill: "forwards" });
+      sparkAnim.onfinish = () => spark.remove();
+    }
+  }
+
+  // Gulir ke atas dengan kurva smootherstep: kecepatan dan percepatan nol di awal dan akhir.
+  // Durasi menyesuaikan jarak. Berhenti jika pengunjung menggulir, menyentuh, atau menekan tombol.
+  function smoothScrollToTop() {
+    const startY = window.scrollY;
+    if (startY <= 0) return;
+
+    const root = document.documentElement;
+    const prevBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+
+    const duration = Math.min(2200, Math.max(900, 650 + Math.sqrt(startY) * 26));
+    const startTime = performance.now();
+    const smootherstep = (t) => t * t * t * (t * (6 * t - 15) + 10);
+    const stopEvents = ["wheel", "touchstart", "touchmove", "pointerdown", "mousedown", "keydown"];
+    let active = true;
+    let expectedY = startY;
+
+    function stop() {
+      if (!active) return;
+      active = false;
+      stopEvents.forEach((name) => window.removeEventListener(name, stop));
+      root.style.scrollBehavior = prevBehavior;
+    }
+
+    stopEvents.forEach((name) => window.addEventListener(name, stop, { passive: true }));
+
+    function step(now) {
+      if (!active) return;
+      // Posisi berubah di luar animasi (misalnya seret scrollbar): hentikan.
+      if (Math.abs(window.scrollY - expectedY) > 3) { stop(); return; }
+      const t = Math.min((now - startTime) / duration, 1);
+      expectedY = startY * (1 - smootherstep(t));
+      window.scrollTo(0, expectedY);
+      if (t < 1) requestAnimationFrame(step);
+      else { window.scrollTo(0, 0); stop(); }
+    }
+    requestAnimationFrame(step);
+  }
+
+  btn.addEventListener("click", () => {
+    if (!reduceMotion && canAnimate) {
+      const rect = btn.getBoundingClientRect();
+      bloomAt(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      btn.animate([
+        { transform: "scale(1)" },
+        { transform: "scale(.92)" },
+        { transform: "scale(1)" }
+      ], { duration: 320, easing: "ease-out" });
+    }
+    smoothScrollToTop();
+  });
+
+  update();
+})();
