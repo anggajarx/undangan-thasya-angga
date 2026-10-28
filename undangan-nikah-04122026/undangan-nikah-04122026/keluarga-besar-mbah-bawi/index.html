@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Thasya & Angga — Undangan Pernikahan</title>
+  <meta name="description" content="Undangan Pernikahan Thasya & Angga, Jum'at 4 Desember 2026.">
+  <meta name="theme-color" content="#cbb6a1">
+  <meta name="format-detection" content="telephone=no">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Arbutus+Slab&family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600&family=Great+Vibes&family=Italiana&family=Kolker+Brush&display=swap" rel="stylesheet">
+  
+  <!-- PENTING: Path CSS menggunakan ../../ karena berada 2 folder di bawah root -->
+  <link rel="stylesheet" href="../../style.css">
+</head>
+<body>
+  <div id="loader" aria-label="Memuat undangan">
+    <div class="loader-content">
+      <img src="../../assets/logoawal.png" alt="T & F Logo" class="loader-logo">
+      <span class="loader-line"></span>
+    </div>
+  </div>
+
+  <main>
+    <!-- COVER -->
+    <section class="cover" id="cover">
+      <div class="cover-bg"></div>
+      <img src="../../assets/sticker1.png" alt="Stiker Hati" class="decor-sticker sticker-cover-1">
+      <img src="../../assets/sticker6.png" alt="Stiker Cincin" class="decor-sticker sticker-cover-2">
+      <img src="../../assets/borderkiriatas.png" alt="Border Kiri Atas" class="decor-border border-kiri-atas">
+      <img src="../../assets/borderkananatas.png" alt="Border Kanan Atas" class="decor-border border-kanan-atas">
+      <img src="../../assets/borderkiribawah.png" alt="Border Kiri Bawah" class="decor-border border-kiri-bawah">
+      <img src="../../assets/borderkananbawah.png" alt="Border Kanan Bawah" class="decor-border border-kanan-bawah">
+      <div class="grain"></div>
+      <div class="cover-overlay"></div>
+      <div class="cover-frame"></div>
+
+      <div class="cover-content">
+        <p class="bismillah reveal">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ</p>
+        <p class="cover-kicker reveal delay-1">UNDANGAN PERNIKAHAN</p>
+        <h1 class="reveal delay-2">Thasya <span>&</span> Angga</h1>
+        <p class="cover-tagline reveal delay-3">Dari Satu Cerita Jadi Selamanya</p>
+        
+        <div class="cover-date reveal delay-4">04 <i>·</i> 12 <i>·</i> 26</div>
+
+        <div class="cover-image-wrapper reveal delay-4">
+          <img src="../../assets/bingkaiorang.png" alt="Ilustrasi Thasya & Angga" class="cover-couple-img">
+        </div>
+
+        <div class="guest-card reveal delay-4">
+          <small>Kepada Yth.</small>
+          <!-- UBAH NAMA TAMU DI SINI SESUAI FOLDER -->
+          <strong id="guestName">Keluarga Besar Mbah Bawi</strong>
+        </div>
+
+        <button class="open-btn reveal delay-5" id="openBtn" aria-label="Buka Undangan">
+          <img src="../../assets/envelope.png" alt="Buka Undangan" class="envelope-btn-img">
+          <span class="btn-text">Buka Undangan</span>
+        </button>
+      </div>
+    </section>
+
+    <div id="invitation" class="hidden">
+      <!-- 01 COUNTDOWN -->
+      <section class="page page-countdown" id="countdown-section">
+        <img loading="lazy" decoding="async" src="../../assets/sticker3.png" alt="Stiker Burung" class="decor-sticker sticker-count-1">
+        <img loading="lazy" decoding="async" src="../../assets/sticker5.png" alt="Stiker Bunga" class="decor-sticker sticker-count-2">
+        <div class="ornament top-ornament reveal-on-scroll">✦</div>
+        <div class="section-inner">
+          <div class="anim-group reveal-on-scroll">
+            <p class="eyebrow">HITUNG MUNDUR</p>
+            <h2 class="display-title">Hari Bahagia <em>semakin</em> dekat!</h2>
+            <div class="title-line"></div>
+          </div>
+          <div class="countdown reveal-on-scroll" id="countdown" role="group" aria-label="Hitung mundur menuju hari pernikahan">
+            <div class="cd-item" data-unit="days">
+              <div class="cd-dial">
+                <svg class="cd-ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                  <circle class="cd-ring-track" cx="50" cy="50" r="46" pathLength="100"></circle>
+                  <circle class="cd-ring-bar" cx="50" cy="50" r="46" pathLength="100"></circle>
+                </svg>
+                <strong class="cd-num" id="days">00</strong>
+              </div>
+              <span class="cd-label">Hari</span>
+            </div>
+            <div class="cd-item" data-unit="hours">
+              <div class="cd-dial">
+                <svg class="cd-ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                  <circle class="cd-ring-track" cx="50" cy="50" r="46" pathLength="100"></circle>
+                  <circle class="cd-ring-bar" cx="50" cy="50" r="46" pathLength="100"></circle>
+                </svg>
+                <strong class="cd-num" id="hours">00</strong>
+              </div>
+              <span class="cd-label">Jam</span>
+            </div>
+            <div class="cd-item" data-unit="minutes">
+              <div class="cd-dial">
+                <svg class="cd-ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                  <circle class="cd-ring-track" cx="50" cy="50" r="46" pathLength="100"></circle>
+                  <circle class="cd-ring-bar" cx="50" cy="50" r="46" pathLength="100"></circle>
+                </svg>
+                <strong class="cd-num" id="minutes">00</strong>
+              </div>
+              <span class="cd-label">Menit</span>
+            </div>
+            <div class="cd-item" data-unit="seconds">
+              <div class="cd-dial">
+                <svg class="cd-ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                  <circle class="cd-ring-track" cx="50" cy="50" r="46" pathLength="100"></circle>
+                  <circle class="cd-ring-bar" cx="50" cy="50" r="46" pathLength="100"></circle>
+                </svg>
+                <strong class="cd-num" id="seconds">00</strong>
+              </div>
+              <span class="cd-label">Detik</span>
+            </div>
+          </div>
+          <p class="cd-caption reveal-on-scroll" id="countdownCaption">Menuju Akad Nikah · 13:30 WIB</p>
+
+          <div class="save-card reveal-on-scroll" id="saveDate">
+            <div class="save-card-head">
+              <div class="save-date-block" aria-hidden="true">
+                <span class="sd-day">Jumat</span>
+                <strong class="sd-num">04</strong>
+                <span class="sd-month">Desember<br>2026</span>
+              </div>
+              <div class="save-card-info">
+                <span class="save-eyebrow">Simpan tanggalnya</span>
+                <h3 class="save-title">Jangan sampai terlewat</h3>
+                <ul class="save-meta">
+                  <li>13:30 – 17:00 WIB</li>
+                  <li>Tuscan Dreams, Jakarta Selatan</li>
+                </ul>
+              </div>
+            </div>
+            <div class="save-chips" aria-label="Jadwal pengingat">
+              <span>Pengingat H-7</span>
+              <span>H-1</span>
+              <span>2 jam sebelum</span>
+            </div>
+            <div class="save-date-buttons">
+              <button type="button" class="outline-btn save-btn-primary" id="saveIcsBtn">Simpan ke Kalender</button>
+              <a class="outline-btn" id="googleCalendarLink" href="https://calendar.google.com/calendar/render?action=TEMPLATE" target="_blank" rel="noopener">Google Kalender <b>↗</b></a>
+            </div>
+            <p class="save-date-hint">Tombol tidak merespons? Buka undangan di Chrome atau Safari, atau gunakan Google Kalender.</p>
+          </div>
+          <div class="quran-card anim-group reveal-on-scroll">
+            <p>“Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan hidup dari jenismu sendiri, supaya kamu merasa tenteram kepadanya, dan dijadikan-Nya di antaramu rasa kasih dan sayang.”</p>
+            <span class="quran-source">QS. Ar-Rum: 21</span>
+          </div>
+          <p class="date-script reveal-on-scroll">Jum'at, 04 Desember 2026</p>
+        </div>
+      </section>
+
+      <!-- 02 COUPLE -->
+      <section class="page page-couple">
+        <img loading="lazy" decoding="async" src="../../assets/sticker4.png" alt="Stiker Tangan" class="decor-sticker sticker-couple-1">
+        <img loading="lazy" decoding="async" src="../../assets/sticker2.png" alt="Stiker Amplop" class="decor-sticker sticker-couple-2">
+        <div class="section-inner">
+          <p class="eyebrow reveal-on-scroll">KEDUA MEMPELAI</p>
+          <h2 class="display-title small reveal-on-scroll">Dua jiwa, <em>satu cerita.</em></h2>
+          <div class="couple-grid">
+            <article class="person reveal-on-scroll">
+              <div class="portrait portrait-thasya">
+                <img loading="lazy" decoding="async" src="../../assets/bride.jpg" alt="Ana Thasya Bella">
+              </div>
+              <p class="role">MEMPELAI WANITA</p>
+              <h3>Ana Thasya Bella</h3>
+              <p class="parents">Putri Kedua dari<br><b>Bapak Agus Mudaim (Alm.)</b><br>& <b>Ibu Imas Yuliani</b></p>
+            </article>
+            <div class="ampersand reveal-on-scroll">&</div>
+            <article class="person reveal-on-scroll">
+              <div class="portrait portrait-fajar">
+                <img loading="lazy" decoding="async" src="../../assets/groom.jpg" alt="Fajar Wirangga">
+              </div>
+              <p class="role">MEMPELAI PRIA</p>
+              <h3>Fajar Wirangga</h3>
+              <p class="parents">Putra Pertama dari<br><b>Bapak Zulkarnaen Sihotang</b><br>& <b>Ibu Ning Ati</b></p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 EVENT -->
+      <section class="page page-event">
+        <img loading="lazy" decoding="async" src="../../assets/sticker8.png" alt="" aria-hidden="true" class="decor-sticker sticker-event-1">
+        <img loading="lazy" decoding="async" src="../../assets/sticker3.png" alt="" aria-hidden="true" class="decor-sticker sticker-event-2">
+        <div class="section-inner">
+          <p class="eyebrow reveal-on-scroll">SIMPAN TANGGALNYA!</p>
+          <h2 class="display-title reveal-on-scroll">Hari <em>Pernikahan</em> Kami</h2>
+          
+          <div class="event-date-large reveal-on-scroll">Jum'at <span>04</span> Desember 2026</div>
+          
+          <div class="event-grid">
+            <!-- Kartu Akad -->
+            <article class="event-card reveal-on-scroll">
+              <img loading="lazy" decoding="async" src="../../assets/sticker1.png" alt="Stiker Akad" class="card-sticker sticker-pos-1">
+              <div class="card-content">
+                <span class="event-no">01</span>
+                <p class="event-type">AKAD NIKAH</p>
+                <h3>13:30 — 14:30</h3>
+                <p>Waktu Indonesia Barat</p>
+              </div>
+            </article>
+            
+            <!-- Kartu Resepsi -->
+            <article class="event-card reveal-on-scroll">
+              <img loading="lazy" decoding="async" src="../../assets/sticker2.png" alt="Stiker Resepsi" class="card-sticker sticker-pos-2">
+              <div class="card-content">
+                <span class="event-no">02</span>
+                <p class="event-type">RESEPSI PERNIKAHAN</p>
+                <h3>15:00 — 17:00</h3>
+                <p>Waktu Indonesia Barat</p>
+              </div>
+            </article>
+          </div>
+
+          <!-- Kartu Lokasi -->
+          <div class="venue-card reveal-on-scroll">
+            <img loading="lazy" decoding="async" src="../../assets/sticker3.png" alt="Stiker Lokasi" class="card-sticker sticker-pos-3">
+            <div class="card-content">
+              <span class="venue-label">LOKASI ACARA</span>
+              <h3>Tuscan Dreams</h3>
+              <address class="venue-address">
+                Jl. Cipete IV No. 6A, RT 02 / RW 04<br>
+                Kel. Cipete Selatan, Kec. Cilandak<br>
+                Kota Jakarta Selatan, DKI Jakarta 12410
+              </address>
+              <a class="outline-btn" href="https://maps.app.goo.gl/qWxzknZgcHq3u2mJ9" target="_blank" rel="noopener">
+                <span>Buka Google Maps</span><b>↗</b>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 LOVE STORY -->
+      <section class="page page-story timeline-story">
+        <img loading="lazy" decoding="async" src="../../assets/sticker1.png" alt="" aria-hidden="true" class="decor-sticker sticker-story-1">
+        <img loading="lazy" decoding="async" src="../../assets/sticker4.png" alt="" aria-hidden="true" class="decor-sticker sticker-story-2">
+        <img loading="lazy" decoding="async" src="../../assets/sticker6.png" alt="" aria-hidden="true" class="decor-sticker sticker-story-3">
+        <div class="section-inner">
+          <p class="eyebrow reveal-on-scroll">KISAH KAMI</p>
+          <h2 class="display-title reveal-on-scroll">Sepotong kisah <em>selamanya</em></h2>
+          <div class="love-timeline">
+            <article class="timeline-item reveal-on-scroll">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <span class="timeline-year">2022</span>
+                <h3>Pertemuan Pertama</h3>
+                <p>Berawal dari sebuah pertemuan yang tidak disengaja dalam sebuah <i>projek kerja</i>. Di tahun 2022, untuk pertama kalinya kami bertemu dan berkenalan di satu tempat yang sama. Sebuah pertemuan sederhana yang saat itu belum kami sangka akan menjadi awal dari cerita panjang kami.</p>
+              </div>
+            </article>
+            <article class="timeline-item reveal-on-scroll">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <span class="timeline-year">2024</span>
+                <h3>Awal Mula</h3>
+                <p>Waktu berjalan, kami kembali bertukar kabar, mendapatkan kontak, dan mulai saling berbagi cerita. Hingga akhirnya kami mengetahui satu hal yang cukup mengejutkan: kami ternyata berkuliah di tempat yang sama, <b>Universitas Gunadarma</b>, dengan selisih usia dua tahun. Dari percakapan-percakapan sederhana, tumbuh rasa nyaman untuk saling mengenal lebih jauh.</p>
+              </div>
+            </article>
+            <article class="timeline-item reveal-on-scroll">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <span class="timeline-year">2026</span>
+                <h3>Sebuah Janji</h3>
+                <p>Setelah melewati berbagai cerita, tawa, proses belajar memahami, dan tumbuh bersama, kami akhirnya sampai pada satu keputusan penting. Di tahun 2026 ini, kami memilih untuk melangkah ke jenjang yang lebih serius dan mengikat janji dalam sebuah <b>pernikahan</b>.</p>
+              </div>
+            </article>
+          </div>
+          <div class="story-closing reveal-on-scroll">
+            <div class="story-ornament">❦</div>
+            <span>Dan di sinilah kisah selamanya kami dimulai.</span>
+            <strong>T & A</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 GALLERY -->
+      <section class="page page-gallery">
+        <img loading="lazy" decoding="async" src="../../assets/sticker7.png" alt="Stiker Mobil" class="decor-sticker sticker-gallery-1">
+        <img loading="lazy" decoding="async" src="../../assets/sticker5.png" alt="" aria-hidden="true" class="decor-sticker sticker-gallery-2">
+        <div class="section-inner">
+          <p class="eyebrow reveal-on-scroll">GALERI KAMI</p>
+          <h2 class="display-title reveal-on-scroll">Momen yang <em>terukir.</em></h2>
+          
+          <div class="gallery-container reveal-on-scroll">
+            <div class="gallery-slider" id="slider1">
+              <div class="slider-track">
+                <figure class="slider-item gallery-1"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-2"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-3"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-4"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-5"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-1"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-2"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-3"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-4"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-5"><div class="frame-overlay"></div></figure>
+              </div>
+            </div>
+          </div>
+
+          <div class="gallery-container reveal-on-scroll">
+            <div class="gallery-slider" id="slider2">
+              <div class="slider-track">
+                <figure class="slider-item gallery-6"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-7"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-8"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-9"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-10"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-6"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-7"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-8"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-9"><div class="frame-overlay"></div></figure>
+                <figure class="slider-item gallery-10"><div class="frame-overlay"></div></figure>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 GIFT -->
+      <section class="page page-gift">
+        <img loading="lazy" decoding="async" src="../../assets/sticker2.png" alt="" aria-hidden="true" class="decor-sticker sticker-gift-1">
+        <img loading="lazy" decoding="async" src="../../assets/sticker6.png" alt="" aria-hidden="true" class="decor-sticker sticker-gift-2">
+        <div class="section-inner narrow">
+          <p class="eyebrow reveal-on-scroll">HADIAH PERNIKAHAN</p>
+          <h2 class="display-title reveal-on-scroll">Tanda <em>Kasih.</em></h2>
+          <p class="gift-intro reveal-on-scroll">Dengan penuh rasa syukur, jika Anda ingin memberikan tanda kasih, Anda dapat mengirimkannya melalui informasi berikut ini.</p>
+          
+            <!-- KARTU BCA DIMULAI -->
+          <div class="gift-card reveal-on-scroll">
+            <div class="gift-card-inner">
+              <img loading="lazy" decoding="async" src="../../assets/bcalogo.png" alt="Logo BCA" class="gift-icon-img">
+              <div class="gift-details">
+                <span class="bank-label">BANK BCA</span>
+                <strong>5865190520</strong>
+                <p>a.n. Ana Thasya Bella</p>
+              </div>
+              <button class="copy-btn" data-copy="5865190520">Salin</button>
+            </div>
+          </div>
+          <!-- KARTU BCA SELESAI -->
+        </div>
+      </section>
+
+      <!-- 07 RSVP (DENGAN KARTU BORDER) -->
+      <section class="page page-rsvp">
+        <img loading="lazy" decoding="async" src="../../assets/sticker8.png" alt="" aria-hidden="true" class="decor-sticker sticker-rsvp-1">
+        <img loading="lazy" decoding="async" src="../../assets/sticker1.png" alt="" aria-hidden="true" class="decor-sticker sticker-rsvp-2">
+        <div class="section-inner narrow">
+          <p class="eyebrow reveal-on-scroll">KONFIRMASI & BUKU TAMU</p>
+          <h2 class="display-title reveal-on-scroll">Mohon <em>Konfirmasi</em></h2>
+          <p class="rsvp-caption reveal-on-scroll">Mohon konfirmasi kehadiran & tuliskan doa terbaik Anda untuk kami.</p>
+          
+          <div class="rsvp-card reveal-on-scroll">
+            <form id="rsvpForm" class="rsvp-form">
+              <label>
+                <span>Nama</span>
+                <input id="nameInput" type="text" placeholder="Nama lengkap" required>
+              </label>
+              <label>
+                <span>Kehadiran</span>
+                <select id="attendance" required>
+                  <option value="">Pilih kehadiran</option>
+                  <option>Hadir</option>
+                  <option>Tidak dapat hadir</option>
+                </select>
+              </label>
+              <label>
+                <span>Ucapan</span>
+                <textarea id="message" placeholder="Tulis ucapan dan doa untuk kedua mempelai..." required></textarea>
+              </label>
+              <div class="emoji-field">
+                <span class="emoji-label">Tambahkan emoji</span>
+                <div class="emoji-picker" role="group" aria-label="Pilih emoji untuk ucapan">
+                  <button type="button" class="emoji-btn" data-emoji="😊" aria-label="Tambah emoji 😊">😊</button>
+                  <button type="button" class="emoji-btn" data-emoji="🥰" aria-label="Tambah emoji 🥰">🥰</button>
+                  <button type="button" class="emoji-btn" data-emoji="❤️" aria-label="Tambah emoji ❤️">❤️</button>
+                  <button type="button" class="emoji-btn" data-emoji="🤲" aria-label="Tambah emoji 🤲">🤲</button>
+                  <button type="button" class="emoji-btn" data-emoji="🙏" aria-label="Tambah emoji 🙏">🙏</button>
+                  <button type="button" class="emoji-btn" data-emoji="🎉" aria-label="Tambah emoji 🎉">🎉</button>
+                  <button type="button" class="emoji-btn" data-emoji="💍" aria-label="Tambah emoji 💍">💍</button>
+                  <button type="button" class="emoji-btn" data-emoji="🌸" aria-label="Tambah emoji 🌸">🌸</button>
+                  <button type="button" class="emoji-btn" data-emoji="✨" aria-label="Tambah emoji ✨">✨</button>
+                  <button type="button" class="emoji-btn" data-emoji="👏" aria-label="Tambah emoji 👏">👏</button>
+                </div>
+              </div>
+              <button type="submit" class="submit-btn">Kirim Ucapan <b>↗</b></button>
+              <div id="rsvpFeedback" class="rsvp-feedback" role="status" aria-live="polite" hidden></div>
+            </form>
+            <div class="messages-wrap">
+              <div class="messages-head">
+                <span>Ucapan &amp; Doa</span>
+                <b id="messageCount">0</b>
+              </div>
+              <div id="messages" class="messages" tabindex="0" aria-label="Daftar ucapan dan doa"></div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+     <!-- 08 THANK YOU -->
+      <section class="page thank-you">
+        <img loading="lazy" decoding="async" src="../../assets/bg-bawah.jpg" alt="Background Bawah" class="thank-you-bg">
+        <div class="section-inner">
+          <p class="eyebrow reveal-on-scroll">TERIMA KASIH!</p>
+          <h2 class="display-title reveal-on-scroll">Kepada <em>Keluarga</em> &<br>Sahabat Tercinta</h2>
+          <div class="thank-line reveal-on-scroll"></div>
+          <p class="thank-copy reveal-on-scroll">Terima kasih telah menjadi bagian dari perjalanan cerita kami dan turut mendoakan langkah baru yang akan kami jalani bersama.</p>
+          <div class="final-names reveal-on-scroll">Thasya <span>&</span> Angga</div>
+          <p class="final-date reveal-on-scroll">04 · 12 · 2026</p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="music-player" id="musicPlayer">
+    <button id="musicBtn" class="music-btn" aria-label="Putar atau jeda musik"><span>♫</span></button>
+    <div class="music-info">
+      <small>MUSIK UNDANGAN</small>
+      <strong id="musicStatus">Musik Mati</strong>
+    </div>
+    <div class="music-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  </div>
+  
+  <audio id="music" loop preload="none">
+    <source src="../../assets/music.mp3" type="audio/mpeg">
+  </audio>
+
+  <button type="button" class="to-top" id="toTopBtn" aria-label="Kembali ke atas halaman">
+    <span class="to-top-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg>
+    </span>
+    <span class="to-top-label">Ke atas</span>
+  </button>
+  
+  <!-- PENTING: Path JS menggunakan ../../ -->
+  <script src="../../script.js"></script>
+</body>
+</html>
