@@ -44,7 +44,12 @@ window.addEventListener("load", () => {
   }, 2000);
 });
 
-/* --- 5. MUSIK --- */
+/* --- 5. MUSIK (ingat posisi & status saat pengunjung kembali) --- */
+const MUSIC_KEY = "anaThasyaMusic";
+let pendingResume = false;      // musik terakhir diputar, tapi belum bisa dimulai tanpa interaksi
+let resumeAfterVisible = false; // musik sedang diputar ketika tab/aplikasi disembunyikan
+let lastSave = 0;
+
 function setMusicState(playing) {
   if (musicPlayer && musicBtn && musicStatus) {
     musicPlayer.classList.toggle("playing", playing);
@@ -53,14 +58,65 @@ function setMusicState(playing) {
   }
 }
 
+function loadMusic() {
+  try { return JSON.parse(localStorage.getItem(MUSIC_KEY) || "null"); }
+  catch (e) { return null; }
+}
+
+function saveMusic() {
+  if (!music) return;
+  try {
+    localStorage.setItem(MUSIC_KEY, JSON.stringify({
+      playing: !music.paused,
+      time: music.currentTime || 0
+    }));
+  } catch (e) { /* penyimpanan tidak tersedia */ }
+  lastSave = Date.now();
+}
+
+// Mulai musik dari posisi terakhir. Dipanggil hanya setelah interaksi pengguna.
+function startMusic() {
+  if (!music) return Promise.reject(new Error("no audio"));
+  const saved = loadMusic();
+  const resumeAt = saved && saved.time > 0 ? saved.time : 0;
+  const applyPosition = () => {
+    if (resumeAt > 0 && music.duration && resumeAt < music.duration - 1) {
+      music.currentTime = resumeAt;
+    }
+  };
+  if (music.readyState >= 1) applyPosition();
+  else music.addEventListener("loadedmetadata", applyPosition, { once: true });
+
+  return music.play()
+    .then(() => { pendingResume = false; setMusicState(true); })
+    .catch(() => setMusicState(false));
+}
+
+// Saat pertama kali ada interaksi (sentuh/klik/tombol), lanjutkan musik yang tertunda.
+function armResume() {
+  const resumeOnGesture = () => {
+    document.removeEventListener("pointerdown", resumeOnGesture);
+    document.removeEventListener("keydown", resumeOnGesture);
+    if (pendingResume && music && music.paused) startMusic();
+  };
+  document.addEventListener("pointerdown", resumeOnGesture);
+  document.addEventListener("keydown", resumeOnGesture);
+}
+
+(function initMusicMemory() {
+  if (!music) return;
+  const saved = loadMusic();
+  if (saved && saved.playing) {
+    pendingResume = true;
+    armResume();
+  }
+  setMusicState(false);
+})();
+
 if (openBtn) {
   openBtn.addEventListener("click", () => {
     if (cover) cover.classList.add("hide-cover");
-    if (music) {
-      music.play()
-        .then(() => setMusicState(true))
-        .catch(() => setMusicState(false));
-    }
+    startMusic();
     setTimeout(() => {
       if (cover) cover.style.display = "none";
       if (invitation) invitation.classList.remove("hidden");
@@ -73,12 +129,9 @@ if (openBtn) {
 if (musicBtn) {
   musicBtn.addEventListener("click", () => {
     if (!music) return;
-    if (music.paused) {
-      music.play().then(() => setMusicState(true)).catch(() => setMusicState(false));
-    } else {
-      music.pause();
-      setMusicState(false);
-    }
+    pendingResume = false;
+    if (music.paused) startMusic();
+    else { music.pause(); setMusicState(false); }
   });
   musicBtn.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -89,10 +142,25 @@ if (musicBtn) {
 }
 
 if (music) {
-  music.addEventListener("play", () => setMusicState(true));
-  music.addEventListener("pause", () => setMusicState(false));
+  music.addEventListener("play", () => { setMusicState(true); saveMusic(); });
+  music.addEventListener("pause", () => { setMusicState(false); saveMusic(); });
+  music.addEventListener("timeupdate", () => {
+    if (Date.now() - lastSave > 2000) saveMusic();
+  });
+  window.addEventListener("pagehide", saveMusic);
+  window.addEventListener("beforeunload", saveMusic);
+
+  // Saat tab/aplikasi disembunyikan, musik dijeda; saat kembali, musik diputar lagi jika sebelumnya berputar.
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden && !music.paused) music.pause();
+    if (document.hidden) {
+      if (!music.paused) {
+        resumeAfterVisible = true;
+        music.pause();
+      }
+    } else if (resumeAfterVisible) {
+      resumeAfterVisible = false;
+      startMusic();
+    }
   });
 }
 
@@ -191,7 +259,7 @@ if (music) {
   const start = new Date("2026-12-04T13:30:00+07:00");
   const end = new Date("2026-12-04T17:00:00+07:00");
   const summary = "Pernikahan Thasya & Angga";
-  const location = "Wedding Celebration, Jakarta, Indonesia";
+  const location = "Tuscan Dreams, Jl. Cipete IV No. 6A, Kel. Cipete Selatan, Kec. Cilandak, Kota Jakarta Selatan, DKI Jakarta 12410";
   const mapsUrl = "https://maps.app.goo.gl/qWxzknZgcHq3u2mJ9";
   const description = "Akad Nikah: 13:30 - 14:30 WIB\nResepsi: 15:00 - 17:00 WIB\nLokasi: " + location + "\nPeta: " + mapsUrl;
   const fileName = "Pernikahan-Thasya-Angga-04-12-2026.ics";
@@ -347,6 +415,76 @@ function nameHue(name) {
   return h;
 }
 
+function nameSeed(name) {
+  let s = 0;
+  for (const ch of String(name)) s = (s * 31 + ch.charCodeAt(0)) >>> 0;
+  return s;
+}
+
+const AVATAR_SKIN = ["#f8dcc6", "#f0c6a2", "#dea47d", "#bd8458", "#8f5b3b"];
+const AVATAR_HAIR = ["#2a1c14", "#4b3121", "#1f1b1b", "#6e4a2c"];
+
+// Avatar gaya boneka (chibi): kepala besar, mata bulat berkilap, pipi merona.
+// Warna dan gaya ditentukan dari nama, sehingga tampilannya tetap sama setiap kali dibuka.
+function avatarSvg(name) {
+  const h = nameHue(name);
+  const seed = nameSeed(name);
+  const skin = AVATAR_SKIN[seed % AVATAR_SKIN.length];
+  const hair = AVATAR_HAIR[(seed >>> 4) % AVATAR_HAIR.length];
+  const style = (seed >>> 8) % 5; // 0 hijab, 1 rambut panjang, 2 rambut pendek, 3 pendek berkacamata, 4 ikal
+  const bg = "hsl(" + h + " 40% 92%)";
+  const cloth = "hsl(" + h + " 40% 46%)";
+  const clothDark = "hsl(" + h + " 40% 32%)";
+  const scarf = "hsl(" + ((h + 150) % 360) + " 42% 52%)";
+  const ink = "#2b2118";
+
+  const body =
+    '<path d="M10 100C12 84 28 76 50 76S88 84 90 100Z" fill="' + cloth + '"/>' +
+    '<path d="M42 77L50 88L58 77" fill="none" stroke="' + clothDark + '" stroke-width="2" stroke-linejoin="round"/>';
+  const neck = '<rect x="44" y="64" width="12" height="16" rx="5" fill="' + skin + '"/>';
+
+  let back = "";
+  if (style === 0) {
+    back = '<ellipse cx="50" cy="46" rx="31" ry="34" fill="' + scarf + '"/>';
+  } else if (style === 1) {
+    back = '<path d="M25 46Q22 16 50 16T75 46L79 88Q50 96 21 88Z" fill="' + hair + '"/>';
+  } else if (style === 4) {
+    back = '<circle cx="28" cy="38" r="10" fill="' + hair + '"/>' +
+           '<circle cx="50" cy="27" r="12" fill="' + hair + '"/>' +
+           '<circle cx="72" cy="38" r="10" fill="' + hair + '"/>';
+  }
+
+  const face =
+    '<ellipse cx="50" cy="48" rx="21" ry="23" fill="' + skin + '"/>' +
+    '<ellipse cx="42" cy="50" rx="3.2" ry="4" fill="' + ink + '"/>' +
+    '<ellipse cx="58" cy="50" rx="3.2" ry="4" fill="' + ink + '"/>' +
+    '<circle cx="43.2" cy="48.4" r="1.1" fill="#fff"/>' +
+    '<circle cx="59.2" cy="48.4" r="1.1" fill="#fff"/>' +
+    '<ellipse cx="35.5" cy="58" rx="4" ry="2.4" fill="#e8948a" opacity=".5"/>' +
+    '<ellipse cx="64.5" cy="58" rx="4" ry="2.4" fill="#e8948a" opacity=".5"/>' +
+    '<path d="M45.5 61Q50 65 54.5 61" fill="none" stroke="#8a4a3b" stroke-width="1.8" stroke-linecap="round"/>';
+
+  let front = "";
+  if (style === 0) {
+    front = '<path d="M29 45Q31 25 50 25T71 45Q66 34 50 34T29 45Z" fill="' + scarf + '"/>';
+  } else if (style === 1 || style === 2 || style === 3) {
+    front = '<path d="M27 45Q24 19 50 19T73 45Q66 31 50 32T27 45Z" fill="' + hair + '"/>';
+  } else {
+    front = '<path d="M29 44Q32 33 50 33T71 44Q62 37 50 38T29 44Z" fill="' + hair + '"/>';
+  }
+
+  const glasses = style === 3
+    ? '<circle cx="42" cy="50" r="6.2" fill="none" stroke="' + ink + '" stroke-width="1.4"/>' +
+      '<circle cx="58" cy="50" r="6.2" fill="none" stroke="' + ink + '" stroke-width="1.4"/>' +
+      '<path d="M48.2 50H51.8" stroke="' + ink + '" stroke-width="1.4"/>'
+    : "";
+
+  return '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+    '<rect width="100" height="100" fill="' + bg + '"/>' +
+    body + neck + back + face + front + glasses +
+    "</svg>";
+}
+
 function renderMessages(newIndex = -1) {
   if (!messagesContainer) return;
   if (messageCountEl) messageCountEl.textContent = savedMessages.length;
@@ -365,11 +503,10 @@ function renderMessages(newIndex = -1) {
   }
   messagesContainer.innerHTML = savedMessages.map((item, i) => {
     const att = item.attendance === "Hadir" ? "hadir" : "tidak";
-    const initial = escapeHtml(String(item.name).trim().charAt(0).toUpperCase() || "?");
     return '<article class="message' + (i === newIndex ? " is-new" : "") + '" data-att="' + att +
       '" style="--h:' + nameHue(item.name) + '">' +
       '<header class="msg-head">' +
-      '<span class="msg-avatar" aria-hidden="true">' + initial + "</span>" +
+      '<span class="msg-avatar" aria-hidden="true">' + avatarSvg(item.name) + "</span>" +
       '<div class="msg-meta">' +
       "<strong>" + escapeHtml(item.name) + "</strong>" +
       '<span class="msg-att">' + escapeHtml(attendanceText(item.attendance)) + "</span>" +

@@ -316,28 +316,59 @@ button { cursor: pointer; }
 .date-script { margin: 24px 0 0; font-family: var(--serif); font-style: italic; font-size: 26px; color: var(--gold); }
 
 /* --- 8. SIMPAN KE KALENDER --- */
-.save-date-section {
-  position: relative; width: min(620px, 100%); margin: 0 auto 40px; padding: 28px clamp(16px, 4vw, 34px) 24px;
-  border: 1px solid rgba(169, 139, 107, .28); border-radius: clamp(20px, 3vw, 28px);
-  background: linear-gradient(160deg, rgba(255, 255, 255, .78), rgba(247, 241, 232, .45));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 18px 36px -26px rgba(80, 61, 45, .45);
+.save-card {
+  position: relative; overflow: hidden; width: min(640px, 100%); margin: 0 auto 40px;
+  padding: clamp(20px, 4vw, 30px); border-radius: 26px;
+  background: linear-gradient(150deg, rgba(255, 255, 255, .94), rgba(244, 236, 226, .72));
+  border: 1px solid rgba(169, 139, 107, .28);
+  box-shadow: inset 0 1px 0 #fff, 0 26px 50px -32px rgba(80, 61, 45, .55);
 }
-.save-date-icon {
-  display: grid; place-items: center; width: 52px; height: 52px; margin: 0 auto 14px;
-  border: 1px solid rgba(169, 139, 107, .35); border-radius: 50%; color: var(--gold);
-  background: rgba(255, 255, 255, .6);
+.save-card::before {
+  content: ""; position: absolute; right: -70px; top: -70px; width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(203, 182, 161, .38), transparent 70%); pointer-events: none;
 }
-.save-date-label { margin: 0; font-family: var(--serif); font-size: clamp(20px, 2.6vw, 24px); font-weight: 500; line-height: 1.3; color: var(--ink); }
-.save-date-sub { margin: 8px auto 20px; max-width: 460px; font-size: 13px; line-height: 1.7; color: var(--muted); }
-.save-date-buttons { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
+.save-card-head { position: relative; display: flex; align-items: center; gap: clamp(16px, 4vw, 26px); }
+.save-date-block {
+  flex: none; width: 108px; padding: 16px 8px; border-radius: 20px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: linear-gradient(160deg, #433829, #2b231c); color: #f7efe5;
+  box-shadow: 0 18px 30px -18px rgba(45, 36, 29, .85);
+}
+.sd-day { font-size: 10px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; opacity: .75; }
+.sd-num { font-family: var(--serif); font-size: 50px; font-weight: 500; line-height: 1; margin: 2px 0; }
+.sd-month { font-size: 10px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; line-height: 1.5; opacity: .85; }
+.save-card-info { min-width: 0; text-align: left; }
+.save-eyebrow { display: block; font-size: 11px; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+.save-title { margin: 8px 0 12px; font-family: var(--serif); font-size: clamp(22px, 3vw, 27px); font-weight: 500; line-height: 1.2; color: var(--ink); }
+.save-meta { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; font-size: 14px; color: var(--muted); }
+.save-meta li { display: flex; align-items: center; gap: 9px; }
+.save-meta li::before { content: ""; width: 6px; height: 6px; flex: none; border-radius: 50%; background: var(--gold); }
+.save-chips { position: relative; display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0; }
+.save-chips span {
+  padding: 6px 12px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold); background: rgba(169, 139, 107, .12); border: 1px solid rgba(169, 139, 107, .26);
+}
+.save-date-buttons { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
 .save-date-buttons .outline-btn {
-  flex: 1 1 200px; max-width: 260px; min-height: 48px; gap: 10px; padding: 13px 20px;
+  flex: 1 1 220px; max-width: 280px; min-height: 48px; padding: 13px 20px; gap: 10px;
   border-radius: 999px; cursor: pointer; -webkit-tap-highlight-color: transparent;
 }
 .save-date-buttons .save-btn-primary { background: var(--ink); border-color: var(--ink); color: #fff; }
 .save-date-buttons .save-btn-primary:hover { background: var(--gold); border-color: var(--gold); }
 .save-date-buttons .outline-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-.save-date-hint { margin: 16px 0 0; font-size: 11px; line-height: 1.6; color: var(--muted); opacity: .8; }
+.save-date-hint { position: relative; margin: 18px 0 0; text-align: center; font-size: 12px; line-height: 1.6; color: var(--muted); opacity: .85; }
+
+@media (max-width: 560px) {
+  .save-card-head { flex-direction: column; }
+  .save-card-info { text-align: center; }
+  .save-date-block { width: 100%; flex-direction: row; justify-content: center; gap: 16px; padding: 14px 12px; }
+  .sd-num { font-size: 38px; margin: 0; }
+  .sd-day, .sd-month { text-align: left; }
+  .save-meta li { justify-content: center; }
+  .save-chips { justify-content: center; }
+  .save-date-buttons { flex-direction: column; }
+  .save-date-buttons .outline-btn { flex: none; width: 100%; max-width: none; }
+}
 
 /* --- 9. COUPLE --- */
 .page-couple { background-color: var(--nude); position: relative; overflow: hidden; }
@@ -563,7 +594,7 @@ button { cursor: pointer; }
 .gift-details strong { font-family: "Arbutus Slab", serif; font-size: clamp(24px, 3vw, 28px); font-weight: 400; letter-spacing: 1px; color: var(--ink); }
 .gift-details p { margin: 0; font-size: 15px; color: var(--muted); }
 .copy-btn {
-  padding: 8px 14px;
+  min-height: 40px; padding: 8px 14px;
   border: 1px solid var(--gold);
   border-radius: 4px;
   background: transparent;
@@ -906,9 +937,6 @@ textarea { height: 120px; resize: vertical; }
   .quran-card p { font-size: 17px; line-height: 1.6; }
   .quran-source { font-size: 11px; letter-spacing: 2px; }
   .date-script { font-size: 18px; margin-top: 20px; }
-  .save-date-section { margin-bottom: 30px; padding: 24px 16px 20px; }
-  .save-date-buttons { flex-direction: column; align-items: stretch; }
-  .save-date-buttons .outline-btn { flex: none; width: 100%; max-width: none; }
   .page-event { padding-top: 60px; padding-bottom: 60px; }
   .event-grid { grid-template-columns: 1fr; gap: 20px; max-width: 85%; margin: 0 auto; }
   .event-date-large { font-size: 22px; margin: 15px 0 25px; }
@@ -975,3 +1003,10 @@ textarea { height: 120px; resize: vertical; }
 /* --- 20. UCAPAN: penyesuaian kecil --- */
 @media (max-width: 380px) { .msg-head { gap: 10px; } .message::after { font-size: 52px; } }
 @media (hover: none) { .message:hover { transform: none; } }
+
+/* --- 21. AVATAR KARAKTER (SVG) --- */
+.msg-avatar { overflow: hidden; padding: 0; background: none; box-shadow: 0 6px 14px -8px rgba(60, 45, 30, .5); border: 1px solid rgba(169, 139, 107, .3); }
+.msg-avatar svg { display: block; width: 100%; height: 100%; }
+
+/* --- 22. ALAMAT LOKASI ACARA --- */
+.venue-card .venue-address { margin: 0 0 22px; font-style: normal; font-size: 14px; line-height: 1.75; color: var(--muted); }
