@@ -865,3 +865,41 @@ initGallerySliders();
 
   update();
 })();
+
+/* --- 13. PROTEKSI KONTEN (teks, gambar, sorotan, klik kanan, salin, unduh) --- */
+(function protectContent() {
+  // Kolom isian tetap bisa diketik, ditempel, dan dipilih
+  const EDITABLE = "input, textarea, select, [contenteditable='true']";
+  const isEditable = (el) => !!(el && el.closest && el.closest(EDITABLE));
+
+  // Menu tahan lama / klik kanan (Android, iOS, desktop) dinonaktifkan kecuali di kolom isian
+  document.addEventListener("contextmenu", (e) => {
+    if (!isEditable(e.target)) e.preventDefault();
+  });
+
+  // Teks tidak bisa diblok/dipilih
+  document.addEventListener("selectstart", (e) => {
+    if (!isEditable(e.target)) e.preventDefault();
+  });
+
+  // Gambar dan elemen lain tidak bisa diseret ke tab atau folder lain
+  document.addEventListener("dragstart", (e) => e.preventDefault());
+
+  // Salin & potong di luar kolom isian dinonaktifkan
+  ["copy", "cut"].forEach((type) => {
+    document.addEventListener(type, (e) => {
+      if (!isEditable(e.target)) e.preventDefault();
+    });
+  });
+
+  // Pintasan simpan, cetak, lihat sumber, pilih semua, salin di luar kolom isian dinonaktifkan
+  document.addEventListener("keydown", (e) => {
+    if (!(e.ctrlKey || e.metaKey) || isEditable(e.target)) return;
+    const k = (e.key || "").toLowerCase();
+    if (["s", "p", "u", "a", "c", "x"].includes(k)) e.preventDefault();
+  });
+
+  document.querySelectorAll("img").forEach((img) => {
+    img.draggable = false;
+  });
+})();
