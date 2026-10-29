@@ -105,14 +105,11 @@ button { cursor: pointer; }
   opacity: 0.85;
   width: clamp(200px, 50vw, 600px);
   height: auto;
-  animation: floatUpDown 6s ease-in-out infinite;
 }
 .border-kiri-atas { top: 0; left: 0; }
-.border-kanan-atas { top: 0; right: 0; transform: scaleX(-1); animation: floatUpDownMirror 6s ease-in-out infinite; }
+.border-kanan-atas { top: 0; right: 0; transform: scaleX(-1); }
 .border-kiri-bawah { bottom: 0; left: 0; }
-.border-kanan-bawah { bottom: 0; right: 0; transform: scaleX(-1); animation: floatUpDownMirror 6s ease-in-out infinite; }
-@keyframes floatUpDown { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-@keyframes floatUpDownMirror { 0%, 100% { transform: scaleX(-1) translateY(0); } 50% { transform: scaleX(-1) translateY(-15px); } }
+.border-kanan-bawah { bottom: 0; right: 0; transform: scaleX(-1); }
 .cover-content {
   position: relative;
   width: min(880px, 90%);
@@ -153,6 +150,7 @@ button { cursor: pointer; }
 .cover-date { font-size: 17px; letter-spacing: 5px; color: #f6eee7; margin-bottom: 5px; }
 .cover-date i { font-style: normal; margin: 0 8px; color: #dfcbb8; }
 .cover-image-wrapper {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -165,9 +163,8 @@ button { cursor: pointer; }
   height: auto;
   object-fit: contain;
   filter: drop-shadow(0 10px 20px rgba(45, 32, 24, 0.4));
-  animation: floatCouple 6s ease-in-out infinite;
+  position: relative; z-index: 1;
 }
-@keyframes floatCouple { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 .guest-card {
   margin: 0 auto 5px;
   padding: 8px 20px;
@@ -1136,7 +1133,63 @@ textarea { height: 120px; resize: vertical; }
   box-shadow: 0 0 8px rgba(217, 185, 143, .8); will-change: transform, opacity;
 }
 
-/* --- 25. PONSEL (iOS & Android): animasi tetap hidup, beban dibuat ringan --- */
+/* --- 25. ANIMASI COVER: border sudut, bingkai pasangan, dan frame cahaya --- */
+/* Nilai --amp mengatur besar gerak. Pengaturan "Kurangi gerakan" menurunkannya (lihat seksi 27). */
+
+/* Border sudut: bernapas pelan ke arah tengah, sedikit miring, dan berpendar. Tiap sudut berbeda irama. */
+.decor-border { --amp: 1; will-change: transform, opacity; animation: borderSway 8s ease-in-out infinite; }
+.border-kiri-atas   { --dx: 1;  --dy: 1;  --s: 1;  animation-duration: 8s; }
+.border-kanan-atas  { --dx: -1; --dy: 1;  --s: -1; animation-duration: 9s;   animation-delay: -2.5s; }
+.border-kiri-bawah  { --dx: 1;  --dy: -1; --s: -1; animation-duration: 9.5s; animation-delay: -4.5s; }
+.border-kanan-bawah { --dx: -1; --dy: -1; --s: 1;  animation-duration: 8.5s; animation-delay: -1.2s; }
+@keyframes borderSway {
+  0%, 100% { translate: 0 0; rotate: 0deg; opacity: .78; }
+  50% {
+    translate: calc(var(--dx) * 7px * var(--amp)) calc(var(--dy) * 9px * var(--amp));
+    rotate: calc(var(--s) * .9deg * var(--amp));
+    opacity: 1;
+  }
+}
+
+/* Bingkai pasangan: melayang, dengan aura hangat di belakang dan kilau yang melintas di atas bingkai.
+   Gerak memakai properti translate dan rotate agar tidak bentrok dengan transform efek muncul (.reveal). */
+.cover-image-wrapper { --amp: 1; animation: coupleFloat 7s ease-in-out infinite; }
+@keyframes coupleFloat {
+  0%, 100% { translate: 0 0; rotate: calc(-.5deg * var(--amp)); }
+  50% { translate: 0 calc(-9px * var(--amp)); rotate: calc(.5deg * var(--amp)); }
+}
+.cover-image-wrapper::before {
+  content: ""; position: absolute; inset: -22%; z-index: 0; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 224, 168, .42) 0%, rgba(255, 224, 168, .14) 40%, rgba(255, 224, 168, 0) 68%);
+  animation: auraPulse 5s ease-in-out infinite;
+}
+@keyframes auraPulse {
+  0%, 100% { opacity: .55; transform: scale(.94); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+.cover-image-wrapper::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 42%, rgba(255, 246, 226, .5) 50%, rgba(255, 255, 255, 0) 58%) no-repeat;
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  -webkit-mask: url("assets/bingkaiorang.png") center / contain no-repeat;
+  mask: url("assets/bingkaiorang.png") center / contain no-repeat;
+  animation: frameShine 6.5s ease-in-out 2.5s infinite;
+}
+@keyframes frameShine { 0%, 55% { background-position: 130% 0; } 100% { background-position: -30% 0; } }
+
+/* Frame tipis: seberkas cahaya emas mengelilingi garis frame */
+.cover-frame::before {
+  content: ""; position: absolute; inset: -1px; padding: 1px; pointer-events: none;
+  background: conic-gradient(from var(--ang), rgba(255, 236, 200, 0) 0deg, rgba(255, 236, 200, 0) 296deg, rgba(255, 243, 220, .95) 346deg, rgba(255, 236, 200, 0) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: borderSpin 11s linear infinite;
+}
+
+/* --- 26. PONSEL (iOS & Android): animasi tetap hidup, beban dibuat ringan --- */
 @media (hover: none), (pointer: coarse) {
   /* background-attachment: fixed tidak stabil di iOS dan Android */
   .page, .cover, .thank-you { background-attachment: scroll; }
@@ -1151,13 +1204,14 @@ textarea { height: 120px; resize: vertical; }
   .thank-you-bg { mix-blend-mode: normal; }
 
   /* Siapkan layer GPU hanya untuk elemen yang bergerak terus-menerus */
-  .decor-border, .cover-bg, .cover-couple-img, .card-sticker, .cover .decor-sticker { will-change: transform; }
+  .cover-bg, .cover-image-wrapper, .card-sticker, .cover .decor-sticker { will-change: transform; }
   .page.in-view .decor-sticker { will-change: transform; }
 }
 
-/* --- 26. PREFERENSI GERAK: hormati pengaturan "Kurangi gerakan" di perangkat --- */
+/* --- 27. PREFERENSI GERAK: hormati pengaturan "Kurangi gerakan" di perangkat --- */
 @media (prefers-reduced-motion: reduce) {
-  .decor-border, .cover-bg, .cover-couple-img, .open-btn, .card-sticker { animation: none; }
+  /* Gerak spasial dikurangi 70%. Kilau dan frame cahaya hanya berupa perubahan cahaya, tetap berjalan. */
+  .decor-border, .cover-image-wrapper { --amp: .3; }
   .music-player.playing::before, .music-btn.playing::before, .music-btn.playing::after { animation: none; }
   .to-top { transition: opacity .2s ease, visibility .2s ease; }
 }
