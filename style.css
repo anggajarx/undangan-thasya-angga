@@ -1347,3 +1347,89 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   .love-timeline::after { transition: none; }
   .timeline-item.is-lit .timeline-dot::after, .btn-text { animation: none; }
 }
+
+
+/* --- 29. GALERI: ZOOM FOTO + LATAR BLUR (lightbox) --- */
+.slider-item { cursor: zoom-in; }
+.gallery-slider:active .slider-item { cursor: grabbing; }
+
+/* ikon kaca pembesar saat foto disorot mouse */
+@media (hover: hover) and (pointer: fine) {
+  .slider-item::after {
+    content: ""; position: absolute; right: 14px; bottom: 15px; z-index: 5; width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255, 252, 247, .92) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a98b6b' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='M16 16l4.5 4.5M11 8.5v5M8.5 11h5'/%3E%3C/svg%3E") center / 17px no-repeat;
+    box-shadow: 0 6px 14px -6px rgba(62, 48, 37, .6);
+    opacity: 0; transform: scale(.8); pointer-events: none;
+    transition: opacity .3s ease, transform .35s cubic-bezier(.22, 1, .36, 1);
+  }
+  .slider-item:hover::after { opacity: 1; transform: none; }
+}
+
+html.lb-open, html.lb-open body { overflow: hidden; }
+
+.lb {
+  position: fixed; inset: 0; z-index: 300;
+  touch-action: none; overscroll-behavior: contain; -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none; user-select: none;
+}
+.lb[hidden] { display: none; }
+
+/* latar: gelap hangat + blur (dengan cadangan untuk browser tanpa backdrop-filter) */
+.lb-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(34, 25, 18, .5);
+  -webkit-backdrop-filter: blur(16px) saturate(1.15); backdrop-filter: blur(16px) saturate(1.15);
+  opacity: 0; transition: opacity .45s ease;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lb-backdrop { background: rgba(34, 25, 18, .9); }
+}
+.lb.is-open .lb-backdrop { opacity: var(--lb-dim, 1); }
+
+.lb-stage {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  padding: max(64px, calc(env(safe-area-inset-top, 0px) + 56px)) max(16px, env(safe-area-inset-right, 0px)) max(84px, calc(env(safe-area-inset-bottom, 0px) + 72px)) max(16px, env(safe-area-inset-left, 0px));
+}
+.lb-card {
+  --lb-w: min(88vw, calc((100vh - 170px) * .8), 540px);
+  position: relative; margin: 0; width: var(--lb-w); aspect-ratio: 4 / 5;
+  background-color: #fdfbf7; border-radius: 4px; overflow: hidden; cursor: grab; will-change: transform;
+  box-shadow: 0 46px 90px -24px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .08);
+}
+@supports (height: 100dvh) { .lb-card { --lb-w: min(88vw, calc((100dvh - 170px) * .8), 540px); } }
+.lb-card:active { cursor: grabbing; }
+
+/* tombol kaca */
+.lb-btn {
+  display: grid; place-items: center; width: 46px; height: 46px; padding: 0; border-radius: 50%; cursor: pointer;
+  color: #fbf3e6; background: rgba(255, 252, 247, .14); border: 1px solid rgba(255, 255, 255, .3);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, .6);
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+  transition: background-color .25s ease, transform .3s cubic-bezier(.22, 1, .36, 1), opacity .45s ease;
+  opacity: 0; transform: translateY(8px);
+}
+.lb.is-open .lb-btn { opacity: 1; transform: none; transition-delay: .15s; }
+.lb-btn:active { transform: scale(.92); }
+.lb-btn:focus-visible { outline: 2px solid #e6cb9f; outline-offset: 3px; }
+@media (hover: hover) { .lb-btn:hover { background: rgba(255, 252, 247, .28); } }
+.lb-close { position: absolute; z-index: 3; top: max(14px, env(safe-area-inset-top, 0px)); right: max(14px, env(safe-area-inset-right, 0px)); }
+.lb-bar {
+  position: absolute; z-index: 3; left: 0; right: 0; bottom: max(18px, env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; justify-content: center; gap: 22px; pointer-events: none;
+}
+.lb-bar .lb-btn { pointer-events: auto; }
+.lb-count {
+  margin: 0; min-width: 76px; text-align: center; color: #f3e7d5;
+  font-family: var(--sans); font-size: 12px; font-weight: 500; letter-spacing: .28em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, .5);
+}
+
+@media (max-width: 700px) {
+  .lb-btn { width: 44px; height: 44px; }
+  .lb-bar { gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lb-backdrop, .lb-btn { transition: none; }
+  .lb-btn { transform: none; }
+}
