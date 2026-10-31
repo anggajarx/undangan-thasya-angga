@@ -18,6 +18,22 @@ set -u
 # Format: "nama-folder|Nama Tamu yang Tampil"
 # nama-folder: huruf kecil, angka, dan tanda hubung saja.
 DAFTAR_TAMU=(
+  # --- Kelompok 1 (14 tamu) ---
+  "nisram-beserta-pasangan|Nisram beserta Pasangan"
+  "afiifa|Afiifa"
+  "zaidan|Zaidan"
+  "wulan-beserta-pasangan|Wulan beserta Pasangan"
+  "keluarga-besar-mbah-bawi|Keluarga Besar Mbah Bawi"
+  "keluarga-besar-mbah-soeroredjo|Keluarga Besar Mbah Soeroredjo"
+  "warga-besar-rt-011|Warga Besar RT 011"
+  "keluarga-besar-opung|Keluarga Besar Opung"
+  "om-ucok-beserta-istri|Om Ucok beserta Istri"
+  "mas-rikie-beserta-istri|Mas Rikie beserta Istri"
+  "mas-teguh-dan-istri|Mas Teguh beserta Istri"
+  "fachri-dan-istri|Fachri beserta Istri"
+  "aji-dan-istri|Aji beserta Istri"
+  "ario-dan-istri|Ario beserta Istri"
+  # --- Kelompok 2 (21 tamu) ---
   "hajah-asnil|Hajah Asnil"
   "ibu-ida|Ibu Ida"
   "uwa-awang|Uwa Awang"
@@ -39,6 +55,28 @@ DAFTAR_TAMU=(
   "ibu-mira|Ibu Mira"
   "ibu-ria|Ibu Ria"
   "bapak-deden|Bapak Deden"
+  # --- Kelompok 3 (21 tamu) ---
+  "bapak-mamat|Bapak Mamat"
+  "bapak-usuf|Bapak Usuf"
+  "ibu-ipa|Ibu Ipa"
+  "ibu-irma|Ibu Irma"
+  "bapak-sidik|Bapak Sidik"
+  "ibu-ade|Ibu Ade"
+  "bapak-dady|Bapak Dady"
+  "nok|Nok"
+  "ibu-ade-juji|Ibu Ade Juji"
+  "ibu-anggi|Ibu Anggi"
+  "eyang|Eyang"
+  "mama-widi|Mama Widi"
+  "bapak-dadang|Bapak Dadang"
+  "ibu-neni|Ibu Neni"
+  "bapak-irfan|Bapak Irfan"
+  "bapak-diden|Bapak Diden"
+  "ibu-feli|Ibu Feli"
+  "ibu-qiqi|Ibu Qiqi"
+  "bapak-hilman|Bapak Hilman"
+  "ibu-maya|Ibu Maya"
+  "ibu-dimas|Ibu Dimas"
   # Tambahkan baris lain di sini sesuai kebutuhan
 )
 
@@ -66,6 +104,17 @@ FILE_DAFTAR_LINK="daftar-link.txt"
 if [ ! -f "$TEMPLATE" ]; then
   echo "GAGAL: $TEMPLATE tidak ditemukan di folder ini ($(pwd))."
   exit 1
+fi
+
+# Template lama masih memuat penulisan tanggal tidak formal ("Jum'at", "04 Desember").
+# Hentikan agar halaman tamu tidak dibuat dari template yang salah.
+PERIKSA_TANGGAL_FORMAL="ya"
+if [ "$PERIKSA_TANGGAL_FORMAL" = "ya" ]; then
+  if grep -q "Jum'at" "$TEMPLATE" || grep -q "04 Desember" "$TEMPLATE" || grep -q "<span>04</span>" "$TEMPLATE"; then
+    echo "GAGAL: $TEMPLATE masih memuat penulisan tanggal lama (Jum'at / 04 Desember)."
+    echo "       Ganti dengan template.html terbaru (penulisan: Jumat, 4 Desember 2026)."
+    exit 1
+  fi
 fi
 
 JUMLAH_PLACEHOLDER=$(grep -c "$PLACEHOLDER" "$TEMPLATE")
