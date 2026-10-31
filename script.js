@@ -1070,6 +1070,8 @@ initGallerySliders();
 
 
 /* --- 15. GALERI: ZOOM FOTO DENGAN LATAR BLUR (klik mouse / ketuk layar sentuh) --- */
+/* Animasi digerakkan langsung oleh JavaScript (bukan CSS/WAAPI) dan selalu berakhir di posisi tengah,
+   sehingga tidak bisa "macet" di pojok walau GPU ponsel sedang berat. */
 (function initGalleryLightbox() {
   "use strict";
   try {
@@ -1077,7 +1079,9 @@ initGallerySliders();
     if (!sliders.length) return;
 
     const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const EASE = "cubic-bezier(.22, 1, .36, 1)";
+    const REST = { x: 0, y: 0, r: 0, s: 1, o: 1 };
+    const easeOut = (t) => 1 - Math.pow(1 - t, 4);
+    const easeIn = (t) => t * t * t;
 
     const numOf = (el) => {
       const m = el && el.className && String(el.className).match(/\bgallery-(\d+)\b/);
@@ -1125,6 +1129,45 @@ initGallerySliders();
     let closing = false;
     let busy = false;
     let lastFocus = null;
+    let cur = Object.assign({}, REST);   // posisi kartu saat ini
+    let tweenId = 0;                      // penanda animasi yang sedang berjalan
+
+    /* ---------- Penggerak kartu ---------- */
+    function setState(st) {
+      cur = { x: st.x, y: st.y, r: st.r, s: st.s, o: st.o };
+      if (st.x === 0 && st.y === 0 && st.r === 0 && st.s === 1) card.style.transform = "";
+      else card.style.transform = "translate3d(" + st.x.toFixed(1) + "px," + st.y.toFixed(1) + "px,0) rotate(" + st.r.toFixed(2) + "deg) scale(" + st.s.toFixed(4) + ")";
+      card.style.opacity = st.o >= 1 ? "" : String(Math.max(0, st.o).toFixed(3));
+    }
+    function stopTween() { tweenId++; }
+    // Animasi dari kondisi "from" ke "to". Selalu berakhir tepat di "to" (dijaga timer cadangan).
+    function tween(from, to, ms, ease, onDone) {
+      const id = ++tweenId;
+      if (REDUCE) { setState(to); if (onDone) onDone(); return; }
+      let finished = false;
+      const finish = () => {
+        if (finished || id !== tweenId) return;
+        finished = true;
+        setState(to);
+        card.style.willChange = "";
+        if (onDone) onDone();
+      };
+      card.style.willChange = "transform, opacity";
+      const t0 = performance.now();
+      const frame = (now) => {
+        if (id !== tweenId || finished) return;
+        const k = Math.min(1, (now - t0) / ms);
+        const e = ease(k);
+        setState({
+          x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e,
+          r: from.r + (to.r - from.r) * e, s: from.s + (to.s - from.s) * e,
+          o: from.o + (to.o - from.o) * e
+        });
+        if (k < 1) requestAnimationFrame(frame); else finish();
+      };
+      requestAnimationFrame(frame);
+      setTimeout(finish, ms + 250);
+    }
 
     function setPhoto(i) {
       index = (i + photos.length) % photos.length;
@@ -1133,10 +1176,15 @@ initGallerySliders();
       counter.textContent = (index + 1) + " / " + photos.length;
     }
 
-    // Posisi awal animasi: persis di atas foto yang diketuk (termasuk miring dan skalanya)
-    function transformFor(el) {
+    // Posisi tengah kartu saat diam (tanpa pengaruh geser/skala saat ini)
+    function restCenter() {
+      const r = card.getBoundingClientRect();
+      return { cx: r.left + r.width / 2 - cur.x, cy: r.top + r.height / 2 - cur.y };
+    }
+    // Kondisi kartu agar persis menimpa elemen foto di slider (termasuk kemiringan dan skalanya)
+    function stateOver(el, opacity) {
       const r = el.getBoundingClientRect();
-      const c = card.getBoundingClientRect();
+      const c = restCenter();
       let angle = 0, scale = 1;
       const m = getComputedStyle(el).transform.match(/matrix\(([^)]+)\)/);
       if (m) {
@@ -1144,28 +1192,25 @@ initGallerySliders();
         angle = Math.atan2(v[1], v[0]) * 180 / Math.PI;
         scale = Math.hypot(v[0], v[1]);
       }
-      const s = (el.offsetWidth * scale) / (card.offsetWidth || 1);
-      const dx = (r.left + r.width / 2) - (c.left + c.width / 2);
-      const dy = (r.top + r.height / 2) - (c.top + c.height / 2);
-      return "translate(" + dx.toFixed(1) + "px, " + dy.toFixed(1) + "px) rotate(" + angle.toFixed(2) + "deg) scale(" + s.toFixed(4) + ")";
+      return {
+        x: (r.left + r.width / 2) - c.cx, y: (r.top + r.height / 2) - c.cy,
+        r: angle, s: (el.offsetWidth * scale) / (card.offsetWidth || 1), o: opacity
+      };
     }
 
     // Cari foto di slider (yang sedang terlihat di layar) untuk tujuan animasi tutup
     function pickSource() {
       const n = photos[index];
       const vw = window.innerWidth, vh = window.innerHeight;
-      let best = null, bestArea = 0;
-      sliders.forEach((s) => s.querySelectorAll(".gallery-" + n).forEach((el) => {
-        if (!el.classList.contains("slider-item")) return;
+      let best = null, bestArea = 0, bestFull = 1;
+      sliders.forEach((s) => s.querySelectorAll(".slider-item.gallery-" + n).forEach((el) => {
         const r = el.getBoundingClientRect();
         const w = Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0));
         const h = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
-        const area = w * h;
-        if (area > bestArea) { bestArea = area; best = el; }
+        if (w * h > bestArea) { bestArea = w * h; best = el; bestFull = r.width * r.height; }
       }));
-      return best && bestArea > r2(best) * 0.35 ? best : null;
+      return best && bestArea > bestFull * 0.35 ? best : null;
     }
-    function r2(el) { const r = el.getBoundingClientRect(); return r.width * r.height; }
 
     /* ---------- Buka ---------- */
     function open(item) {
@@ -1176,28 +1221,29 @@ initGallerySliders();
       source = item;
       isOpen = true;
       closing = false;
+      busy = false;
       window.__lbOpen = true;
+      stopTween();
+      setState(REST);
       setPhoto(i);
       lb.hidden = false;
       document.documentElement.classList.add("lb-open");
-      void lb.offsetWidth; // paksa layout agar transisi berjalan
+      void lb.offsetWidth; // paksa layout sebelum mengukur
+      const from = stateOver(item, 0.92);
+      setState(from);      // langsung di atas foto asal, sebelum frame pertama digambar
       lb.classList.add("is-open");
-      if (!REDUCE && card.animate) {
-        card.animate(
-          [{ transform: transformFor(item), opacity: 0.92 }, { transform: "none", opacity: 1 }],
-          { duration: 640, easing: EASE }
-        );
-      }
+      tween(from, REST, 560, easeOut);
       try { btnClose.focus({ preventScroll: true }); } catch (e) {}
     }
 
     /* ---------- Tutup ---------- */
     function finishClose() {
+      stopTween();
       lb.hidden = true;
       lb.classList.remove("is-open");
       document.documentElement.classList.remove("lb-open");
-      card.style.transform = "";
-      card.style.transition = "";
+      setState(REST);
+      card.style.willChange = "";
       lb.style.removeProperty("--lb-dim");
       isOpen = false;
       closing = false;
@@ -1208,43 +1254,25 @@ initGallerySliders();
     function close() {
       if (!isOpen || closing) return;
       closing = true;
+      busy = false;
       lb.classList.remove("is-open");
-      if (REDUCE || !card.animate) { setTimeout(finishClose, 60); return; }
-      const now = getComputedStyle(card).transform;
-      const from = now && now !== "none" ? now : "none";
       const target = pickSource() || (source && source.isConnected && photos[index] === numOf(source) ? source : null);
-      const frames = target
-        ? [{ transform: from, opacity: 1 }, { transform: transformFor(target), opacity: 1 }]
-        : [{ transform: from, opacity: 1 }, { transform: (from === "none" ? "" : from + " ") + "scale(.9)", opacity: 0 }];
-      let done = false;
-      const end = () => { if (done) return; done = true; finishClose(); };
-      const anim = card.animate(frames, { duration: 460, easing: EASE, fill: "forwards" });
-      anim.onfinish = end;
-      setTimeout(end, 700);
+      const from = Object.assign({}, cur);
+      const to = target ? stateOver(target, 1) : { x: cur.x, y: cur.y, r: cur.r, s: cur.s * 0.9, o: 0 };
+      tween(from, to, 440, easeOut, finishClose);
     }
 
     /* ---------- Ganti foto ---------- */
     function go(dir) {
       if (!isOpen || closing || busy) return;
       busy = true;
-      if (REDUCE || !card.animate) { setPhoto(index + dir); busy = false; return; }
-      const now = getComputedStyle(card).transform;
-      const from = now && now !== "none" ? now : "none";
-      const out = card.animate(
-        [{ transform: from, opacity: 1 }, { transform: "translateX(" + (-dir * 90) + "px) rotate(" + (-dir * 5) + "deg)", opacity: 0 }],
-        { duration: 220, easing: "ease-in", fill: "forwards" }
-      );
-      out.onfinish = () => {
-        card.style.transform = "";
-        out.cancel();
+      if (REDUCE) { setPhoto(index + dir); busy = false; return; }
+      const out = { x: -dir * 90, y: cur.y, r: -dir * 5, s: cur.s, o: 0 };
+      tween(Object.assign({}, cur), out, 200, easeIn, () => {
         setPhoto(index + dir);
-        const inn = card.animate(
-          [{ transform: "translateX(" + (dir * 90) + "px) rotate(" + (dir * 5) + "deg)", opacity: 0 }, { transform: "none", opacity: 1 }],
-          { duration: 420, easing: EASE }
-        );
-        inn.onfinish = () => { busy = false; };
-        setTimeout(() => { busy = false; }, 600);
-      };
+        tween({ x: dir * 90, y: 0, r: dir * 5, s: 1, o: 0 }, REST, 400, easeOut, () => { busy = false; });
+      });
+      setTimeout(() => { busy = false; }, 900);
     }
 
     /* ---------- Gestur: geser kiri/kanan = ganti foto, tarik ke bawah = tutup ---------- */
@@ -1252,6 +1280,7 @@ initGallerySliders();
     stage.addEventListener("pointerdown", (e) => {
       if (!isOpen || closing || busy) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
+      stopTween();
       drag = { id: e.pointerId, x: e.clientX, y: e.clientY, dx: 0, dy: 0, moved: false, onCard: !!e.target.closest(".lb-card") };
       try { stage.setPointerCapture(e.pointerId); } catch (err) {}
     });
@@ -1261,7 +1290,7 @@ initGallerySliders();
       drag.dy = e.clientY - drag.y;
       if (!drag.moved && Math.hypot(drag.dx, drag.dy) > 8) drag.moved = true;
       if (drag.moved) {
-        card.style.transform = "translate(" + drag.dx + "px, " + (drag.dy * 0.7) + "px) rotate(" + (drag.dx * 0.025).toFixed(2) + "deg)";
+        setState({ x: drag.dx, y: drag.dy * 0.7, r: drag.dx * 0.025, s: 1, o: 1 });
         lb.style.setProperty("--lb-dim", String(1 - Math.min(Math.abs(drag.dy) / 520, 0.55)));
       }
     });
@@ -1274,9 +1303,7 @@ initGallerySliders();
       const ax = Math.abs(d.dx), ay = Math.abs(d.dy);
       if (!cancelled && ax > 70 && ax > ay) { go(d.dx < 0 ? 1 : -1); return; }
       if (!cancelled && (d.dy > 110 || ay > 160)) { close(); return; }
-      const from = card.style.transform;
-      card.style.transform = "";
-      if (from && card.animate && !REDUCE) card.animate([{ transform: from }, { transform: "none" }], { duration: 420, easing: EASE });
+      tween(Object.assign({}, cur), REST, 380, easeOut);   // kembali ke tengah
     }
     stage.addEventListener("pointerup", (e) => endDrag(e, false));
     stage.addEventListener("pointercancel", (e) => endDrag(e, true));
@@ -1301,6 +1328,7 @@ initGallerySliders();
 
     /* ---------- Pemicu: ketuk / klik foto di slider (tidak aktif saat digeser) ---------- */
     let press = null;
+    let lastOpenAt = 0;
     sliders.forEach((s) => {
       s.addEventListener("pointerdown", (e) => {
         if (e.pointerType === "mouse" && e.button !== 0) return;
@@ -1314,10 +1342,15 @@ initGallerySliders();
         if (moved > 10 || dt > 650) return;
         const hit = document.elementFromPoint(e.clientX, e.clientY);
         const item = hit && hit.closest ? hit.closest(".slider-item") : null;
-        if (item) open(item);
+        if (item) { lastOpenAt = performance.now(); open(item); }
       }, true);
       s.addEventListener("pointercancel", () => { press = null; }, true);
     });
+
+    // Klik "susulan" dari ketukan yang sama (browser ponsel) tidak boleh menekan tombol di lightbox
+    lb.addEventListener("click", (e) => {
+      if (performance.now() - lastOpenAt < 450) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
   } catch (err) {
     /* galeri tetap berfungsi sebagai slider biasa jika lightbox gagal */
   }

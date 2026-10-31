@@ -1365,7 +1365,12 @@ body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; 
   .slider-item:hover::after { opacity: 1; transform: none; }
 }
 
-html.lb-open, html.lb-open body { overflow: hidden; }
+/* Kunci gulir halaman hanya di desktop; di ponsel overlay sudah memakai touch-action: none (tidak menggeser layout) */
+@media (hover: hover) and (pointer: fine) { html.lb-open, html.lb-open body { overflow: hidden; } }
+
+/* Hentikan semua animasi di belakang saat foto dibuka: blur tidak perlu dihitung ulang tiap frame (lebih lancar di ponsel) */
+html.lb-open body > :not(.lb),
+html.lb-open body > :not(.lb) * { animation-play-state: paused !important; }
 
 .lb {
   position: fixed; inset: 0; z-index: 300;
@@ -1393,7 +1398,7 @@ html.lb-open, html.lb-open body { overflow: hidden; }
 .lb-card {
   --lb-w: min(88vw, calc((100vh - 170px) * .8), 540px);
   position: relative; margin: 0; width: var(--lb-w); aspect-ratio: 4 / 5;
-  background-color: #fdfbf7; border-radius: 4px; overflow: hidden; cursor: grab; will-change: transform;
+  background-color: #fdfbf7; border-radius: 4px; overflow: hidden; cursor: grab;
   box-shadow: 0 46px 90px -24px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .08);
 }
 @supports (height: 100dvh) { .lb-card { --lb-w: min(88vw, calc((100dvh - 170px) * .8), 540px); } }
@@ -1428,6 +1433,10 @@ html.lb-open, html.lb-open body { overflow: hidden; }
 @media (max-width: 700px) {
   .lb-btn { width: 44px; height: 44px; }
   .lb-bar { gap: 16px; }
+}
+@media (hover: none), (pointer: coarse) {
+  .lb-backdrop { -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); transition-duration: .25s; }
+  .lb-btn { -webkit-backdrop-filter: none; backdrop-filter: none; background: rgba(255, 252, 247, .24); }
 }
 @media (prefers-reduced-motion: reduce) {
   .lb-backdrop, .lb-btn { transition: none; }
