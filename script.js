@@ -903,3 +903,167 @@ initGallerySliders();
     img.draggable = false;
   });
 })();
+
+/* --- 14. EFEK GERAK TAMBAHAN (aesthetic & modern; Web, Android, iOS, Mac) --- */
+(function initExtraMotion() {
+  "use strict";
+
+  const REDUCE = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const COARSE = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  const FINE = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const conn = navigator.connection || {};
+  const LITE = !!conn.saveData ||
+    (navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+    (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const safe = (fn) => { try { fn(); } catch (e) { /* efek tambahan tidak boleh mengganggu fungsi utama */ } };
+
+  /* 14a. Judul: pecah menjadi kata agar muncul bergantian */
+  function splitHeadings() {
+    document.querySelectorAll(".display-title").forEach((title) => {
+      if (title.dataset.split) return;
+      title.dataset.split = "1";
+      let index = 0;
+      const walk = (node) => {
+        Array.from(node.childNodes).forEach((child) => {
+          if (child.nodeType === 3) {
+            const parts = child.textContent.split(/(\s+)/);
+            const frag = document.createDocumentFragment();
+            parts.forEach((part) => {
+              if (!part) return;
+              if (/^\s+$/.test(part)) {
+                frag.appendChild(document.createTextNode(" "));
+              } else {
+                const w = document.createElement("span");
+                w.className = "w";
+                w.style.setProperty("--wi", index++);
+                w.textContent = part;
+                frag.appendChild(w);
+              }
+            });
+            child.replaceWith(frag);
+          } else if (child.nodeType === 1 && child.tagName !== "BR") {
+            walk(child);
+          }
+        });
+      };
+      walk(title);
+    });
+  }
+
+  /* 14b. Debu emas melayang di cover dan bagian penutup */
+  function addDust() {
+    if (REDUCE) return;
+    const count = LITE ? 6 : COARSE ? 12 : 24;
+    ["#cover", ".thank-you"].forEach((selector) => {
+      const host = document.querySelector(selector);
+      if (!host) return;
+      const wrap = document.createElement("div");
+      wrap.className = "dust";
+      wrap.setAttribute("aria-hidden", "true");
+      for (let i = 0; i < count; i++) {
+        const dot = document.createElement("i");
+        const dur = 11 + Math.random() * 12;
+        dot.style.setProperty("--x", (Math.random() * 100).toFixed(1) + "%");
+        dot.style.setProperty("--s", (3 + Math.random() * 5).toFixed(1) + "px");
+        dot.style.setProperty("--t", dur.toFixed(1) + "s");
+        dot.style.setProperty("--dl", (-Math.random() * dur).toFixed(1) + "s");
+        dot.style.setProperty("--dx", (Math.random() * 80 - 40).toFixed(0) + "px");
+        dot.style.setProperty("--o", (0.45 + Math.random() * 0.45).toFixed(2));
+        wrap.appendChild(dot);
+      }
+      host.insertBefore(wrap, host.firstChild);
+    });
+  }
+
+  /* 14c. Gerak yang mengikuti gulir: parallax stiker + garis waktu */
+  function initScrollMotion() {
+    if (REDUCE) return;
+    const pages = Array.from(document.querySelectorAll(".page"));
+    const timeline = document.querySelector(".love-timeline");
+    const items = timeline ? Array.from(timeline.querySelectorAll(".timeline-item")) : [];
+    let ticking = false;
+
+    function update() {
+      ticking = false;
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+
+      pages.forEach((page) => {
+        if (!page.classList.contains("in-view")) return;
+        const r = page.getBoundingClientRect();
+        const p = (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2);
+        page.style.setProperty("--py", clamp(p, -1, 1).toFixed(3));
+      });
+
+      if (timeline) {
+        const r = timeline.getBoundingClientRect();
+        const line = vh * 0.62;
+        timeline.style.setProperty("--tl", clamp((line - r.top) / Math.max(r.height, 1), 0, 1).toFixed(3));
+        items.forEach((item) => {
+          const dot = item.querySelector(".timeline-dot");
+          if (dot) item.classList.toggle("is-lit", dot.getBoundingClientRect().top < line);
+        });
+      }
+    }
+    const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+
+    window.addEventListener("scroll", request, { passive: true });
+    window.addEventListener("resize", request);
+    // Hitung ulang saat undangan dibuka (bagian ini awalnya tersembunyi)
+    const invitation = document.getElementById("invitation");
+    if (invitation && "MutationObserver" in window) {
+      new MutationObserver(() => { setTimeout(request, 150); setTimeout(request, 700); })
+        .observe(invitation, { attributes: true, attributeFilter: ["class"] });
+    }
+    request();
+  }
+
+  /* 14d. Efek riak pada tombol */
+  function initRipple() {
+    if (REDUCE) return;
+    document.addEventListener("pointerdown", (e) => {
+      const btn = e.target.closest && e.target.closest(".outline-btn, .submit-btn, .copy-btn, .emoji-btn");
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height) * 1.6;
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      ripple.style.width = ripple.style.height = size + "px";
+      ripple.style.left = (e.clientX - rect.left - size / 2) + "px";
+      ripple.style.top = (e.clientY - rect.top - size / 2) + "px";
+      btn.appendChild(ripple);
+      ripple.addEventListener("animationend", () => ripple.remove());
+    }, { passive: true });
+  }
+
+  /* 14e. Cahaya lembut mengikuti kursor (laptop/desktop saja) */
+  function initCursorGlow() {
+    if (REDUCE || LITE || !FINE) return;
+    const glow = document.createElement("div");
+    glow.className = "cursor-glow";
+    glow.setAttribute("aria-hidden", "true");
+    document.body.appendChild(glow);
+
+    let tx = 0, ty = 0, x = 0, y = 0, running = false;
+    function frame() {
+      x += (tx - x) * 0.14;
+      y += (ty - y) * 0.14;
+      glow.style.transform = "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0)";
+      if (Math.abs(tx - x) > 0.5 || Math.abs(ty - y) > 0.5) requestAnimationFrame(frame);
+      else running = false;
+    }
+    document.addEventListener("pointermove", (e) => {
+      if (e.pointerType !== "mouse" && e.pointerType !== "pen") return;
+      if (!glow.classList.contains("is-on")) { x = tx = e.clientX; y = ty = e.clientY; glow.classList.add("is-on"); }
+      tx = e.clientX; ty = e.clientY;
+      if (!running) { running = true; requestAnimationFrame(frame); }
+    }, { passive: true });
+    document.documentElement.addEventListener("mouseleave", () => glow.classList.remove("is-on"));
+  }
+
+  safe(splitHeadings);
+  safe(addDust);
+  safe(initScrollMotion);
+  safe(initRipple);
+  safe(initCursorGlow);
+})();

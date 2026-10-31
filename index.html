@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#f2e9de">
+  <meta name="color-scheme" content="light">
   <title>Halaman Tidak Tersedia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -153,6 +154,21 @@
       100% { transform: translate3d(calc(var(--dx) * -.6), -118vh, 0) scale(.5); opacity: 0; }
     }
 
+    /* Gerak tambahan: orb ketiga, garis pembatas tumbuh, berlian berdenyut, judul muncul per kata */
+    .orb-3 { width: 300px; height: 300px; top: 42%; left: 58%; background: radial-gradient(circle, #f1dfc2 0%, rgba(241, 223, 194, 0) 70%); opacity: .45; animation: drift3 22s ease-in-out infinite; }
+    @keyframes drift3 { 0%, 100% { transform: translate3d(0, 0, 0) scale(1); } 50% { transform: translate3d(-60px, 40px, 0) scale(1.15); } }
+    .divider i { transform-origin: center; animation: lineGrow 1s cubic-bezier(.22, 1, .36, 1) 1s both; }
+    @keyframes lineGrow { from { scale: 0 1; opacity: 0; } to { scale: 1 1; opacity: 1; } }
+    .divider b { animation: diamondGlow 3.6s ease-in-out 1.8s infinite; }
+    @keyframes diamondGlow {
+      0%, 100% { scale: 1; box-shadow: 0 0 0 0 rgba(217, 187, 144, 0); }
+      50% { scale: 1.5; box-shadow: 0 0 10px 2px rgba(217, 187, 144, .55); }
+    }
+    .h-w { display: inline-block; animation: wordUp .9s cubic-bezier(.22, 1, .36, 1) calc(.62s + var(--wi, 0) * .09s) both; }
+    @keyframes wordUp { from { opacity: 0; translate: 0 .5em; filter: blur(6px); } to { opacity: 1; translate: 0 0; filter: blur(0); } }
+    @media (hover: none), (pointer: coarse) { @keyframes wordUp { from { opacity: 0; translate: 0 .5em; filter: blur(3px); } to { opacity: 1; translate: 0 0; filter: blur(0); } } }
+    @media (prefers-reduced-motion: reduce) { .orb-3, .divider i, .divider b, .h-w { animation: none !important; } }
+
     @media (max-width: 420px) {
       .card { padding: 44px 24px 34px; border-radius: 26px; }
       .icon { width: 80px; height: 80px; }
@@ -171,6 +187,7 @@
 <body>
   <div class="orb orb-1" aria-hidden="true"></div>
   <div class="orb orb-2" aria-hidden="true"></div>
+  <div class="orb orb-3" aria-hidden="true"></div>
 
   <div class="sparks" id="sparks" aria-hidden="true"></div>
 
@@ -294,6 +311,24 @@
       }
       document.documentElement.addEventListener("mouseleave", resetTilt);
       window.addEventListener("blur", resetTilt);
+    })();
+  </script>
+  <script>
+    (function () {
+      try {
+        var h = document.querySelector("h1");
+        if (!h || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        var words = h.textContent.trim().split(/\s+/);
+        h.textContent = "";
+        words.forEach(function (word, i) {
+          var span = document.createElement("span");
+          span.className = "h-w";
+          span.style.setProperty("--wi", i);
+          span.textContent = word;
+          h.appendChild(span);
+          if (i < words.length - 1) h.appendChild(document.createTextNode(" "));
+        });
+      } catch (e) {}
     })();
   </script>
 </body>

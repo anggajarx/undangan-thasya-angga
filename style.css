@@ -1233,3 +1233,117 @@ img, svg, video, canvas {
 }
 button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 button:focus:not(:focus-visible), a:focus:not(:focus-visible) { outline: none; }
+
+/* --- 28. LAPISAN GERAK TAMBAHAN: aesthetic & modern (Web, Android, iOS, Mac) --- */
+:root { color-scheme: light; --ease-out: cubic-bezier(.22, 1, .36, 1); }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+
+/* 28a. Judul: kata muncul satu per satu (script memecah teks menjadi .w) */
+.display-title .w {
+  display: inline-block; opacity: 0; filter: blur(6px);
+  transform: translate3d(0, .5em, 0) rotate(1.5deg);
+  transition: opacity .9s var(--ease-out), transform .9s var(--ease-out), filter .9s var(--ease-out);
+  transition-delay: calc(var(--wi, 0) * 85ms + 150ms);
+}
+.display-title.is-visible .w,
+.anim-group.is-visible .display-title .w { opacity: 1; filter: blur(0); transform: none; }
+
+/* 28b. Kata beraksen (em) berkilau emas, hanya berjalan saat panel terlihat */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .display-title em .w {
+    --em-base: var(--gold); --em-hi: #f1dcb4;
+    background-image: linear-gradient(105deg, var(--em-base) 0%, var(--em-base) 40%, var(--em-hi) 50%, var(--em-base) 60%, var(--em-base) 100%);
+    background-size: 260% 100%; background-position: 120% 0;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+    animation: emShine 6.5s ease-in-out 1.6s infinite;
+    animation-play-state: paused;
+  }
+  .page.in-view .display-title em .w { animation-play-state: running; }
+  .thank-you .display-title em .w { --em-base: #d6bb9c; --em-hi: #fff3d6; }
+}
+@keyframes emShine { 0%, 55% { background-position: 120% 0; } 100% { background-position: -120% 0; } }
+
+/* 28c. Debu emas yang naik pelan (cover dan penutup) */
+.dust { position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
+.dust i {
+  position: absolute; left: var(--x); bottom: -14px; width: var(--s); height: var(--s); border-radius: 50%;
+  background: radial-gradient(circle, #fffaf0 0%, #e9cd9d 48%, rgba(233, 205, 157, 0) 72%);
+  opacity: 0; will-change: transform, opacity;
+  animation: dustRise var(--t) linear var(--dl) infinite;
+}
+@keyframes dustRise {
+  0%   { transform: translate3d(0, 0, 0) scale(.6); opacity: 0; }
+  12%  { opacity: var(--o, .8); }
+  55%  { transform: translate3d(var(--dx), -62vh, 0) scale(1); }
+  100% { transform: translate3d(calc(var(--dx) * -.6), -115vh, 0) scale(.5); opacity: 0; }
+}
+.page .dust i { animation-play-state: paused; }
+.page.in-view .dust i { animation-play-state: running; }
+
+/* 28d. Parallax halus stiker lewat properti translate (tidak bentrok dengan animasi melayang) */
+.page .decor-sticker { --pf: -30px; translate: 0 calc(var(--py, 0) * var(--pf)); }
+.page .decor-sticker:nth-of-type(even) { --pf: 26px; }
+
+/* 28e. Garis waktu: garis emas terisi mengikuti gulir, titik menyala saat terlewati */
+.love-timeline::after {
+  content: ""; position: absolute; left: 25px; top: 4px; bottom: 0; width: 2px; margin-left: -.5px; border-radius: 2px;
+  background: linear-gradient(180deg, #e3cca2, #a98b6b);
+  transform: scaleY(var(--tl, 0)); transform-origin: top center;
+  pointer-events: none; will-change: transform;
+}
+.timeline-item.is-lit .timeline-dot { background: #c79a52; box-shadow: 0 0 0 1px rgba(169, 139, 107, .35), 0 0 0 6px rgba(199, 154, 82, .18); }
+.timeline-item.is-lit .timeline-dot::after {
+  content: ""; position: absolute; inset: -3px; border-radius: 50%;
+  border: 1px solid rgba(199, 154, 82, .65); pointer-events: none;
+  animation: dotPulse 2.6s ease-out infinite;
+}
+@keyframes dotPulse { 0% { transform: scale(1); opacity: .85; } 100% { transform: scale(2.4); opacity: 0; } }
+@media (max-width: 700px) { .love-timeline::after { left: 18px; } }
+
+/* 28f. Tombol: efek riak saat disentuh, naik halus saat disorot (mouse) */
+.outline-btn, .submit-btn, .copy-btn, .emoji-btn { position: relative; overflow: hidden; isolation: isolate; }
+.ripple {
+  position: absolute; z-index: 0; border-radius: 50%; pointer-events: none;
+  background: rgba(199, 154, 82, .38); transform: scale(0);
+  animation: rippleOut .75s var(--ease-out) forwards;
+}
+@keyframes rippleOut { to { transform: scale(1); opacity: 0; } }
+@media (hover: hover) and (pointer: fine) {
+  .outline-btn:hover, .copy-btn:hover, .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -14px rgba(62, 48, 37, .55); }
+}
+
+/* 28g. Tombol "Buka Undangan": denyut cahaya lembut agar menarik perhatian */
+.btn-text { animation: openPulse 2.8s ease-out 1.2s infinite; }
+@keyframes openPulse {
+  0%   { box-shadow: 0 4px 10px rgba(0, 0, 0, .15), 0 0 0 0 rgba(255, 236, 200, .55); }
+  70%  { box-shadow: 0 4px 10px rgba(0, 0, 0, .15), 0 0 0 14px rgba(255, 236, 200, 0); }
+  100% { box-shadow: 0 4px 10px rgba(0, 0, 0, .15), 0 0 0 0 rgba(255, 236, 200, 0); }
+}
+
+/* 28h. Cahaya yang mengikuti kursor (hanya laptop dan desktop dengan mouse atau trackpad) */
+.cursor-glow {
+  position: fixed; left: 0; top: 0; z-index: 60; width: 460px; height: 460px; margin: -230px 0 0 -230px;
+  border-radius: 50%; pointer-events: none; opacity: 0; will-change: transform, opacity;
+  background: radial-gradient(circle, rgba(255, 226, 170, .26) 0%, rgba(255, 226, 170, .08) 45%, rgba(255, 226, 170, 0) 70%);
+  transition: opacity .6s ease;
+}
+.cursor-glow.is-on { opacity: 1; }
+
+/* 28i. Ponsel: efek tetap ada, beban GPU dikurangi */
+@media (hover: none), (pointer: coarse) {
+  .display-title .w { filter: blur(3px); }
+  .display-title.is-visible .w, .anim-group.is-visible .display-title .w { filter: blur(0); }
+  .cursor-glow { display: none; }
+}
+
+/* 28j. Hormati pengaturan "Kurangi gerakan" */
+@media (prefers-reduced-motion: reduce) {
+  .display-title .w { opacity: 1; filter: none; transform: none; transition: none; }
+  .display-title em .w { animation: none; background-position: 50% 0; }
+  .dust, .cursor-glow, .ripple { display: none; }
+  .page .decor-sticker { translate: none; }
+  .love-timeline::after { transition: none; }
+  .timeline-item.is-lit .timeline-dot::after, .btn-text { animation: none; }
+}
