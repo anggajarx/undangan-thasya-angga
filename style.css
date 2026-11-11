@@ -1516,3 +1516,16 @@ html.lb-open body > :not(.lb) * { animation-play-state: paused !important; }
   .hashtag::after { transform: scaleX(1); transition: none; }
   .hashtag .ht-key::after { display: none; }
 }
+
+/* --- 31. AVATAR SUPERHERO: ukuran lebih besar agar detail terlihat, ring mengikuti warna kostum --- */
+.msg-avatar {
+  width: 46px; height: 46px;
+  border: 2px solid hsl(var(--h, 40) 55% 52% / .6);
+  box-shadow: 0 8px 16px -9px rgba(45, 34, 24, .75);
+  background: none;
+}
+.msg-avatar svg { shape-rendering: geometricPrecision; }
+@media (max-width: 700px) {
+  .msg-avatar { width: 42px; height: 42px; }
+}
+

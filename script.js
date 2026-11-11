@@ -430,65 +430,138 @@ function nameSeed(name) {
 const AVATAR_SKIN = ["#f8dcc6", "#f0c6a2", "#dea47d", "#bd8458", "#8f5b3b"];
 const AVATAR_HAIR = ["#2a1c14", "#4b3121", "#1f1b1b", "#6e4a2c"];
 
-// Avatar gaya boneka (chibi): kepala besar, mata bulat berkilap, pipi merona.
-// Warna dan gaya ditentukan dari nama, sehingga tampilannya tetap sama setiap kali dibuka.
+function starPoints(cx, cy, R, r) {
+  const pts = [];
+  for (let i = 0; i < 10; i++) {
+    const rad = i % 2 === 0 ? R : r;
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    pts.push((cx + rad * Math.cos(a)).toFixed(1) + "," + (cy + rad * Math.sin(a)).toFixed(1));
+  }
+  return pts.join(" ");
+}
+
+// Sinar latar bergaya komik (dihitung sekali)
+const AVATAR_BURST = (function () {
+  let d = "";
+  for (let i = 0; i < 12; i += 2) {
+    const a1 = (i * 30 * Math.PI) / 180;
+    const a2 = ((i + 1) * 30 * Math.PI) / 180;
+    d += "M50 50L" + (50 + 90 * Math.cos(a1)).toFixed(1) + " " + (50 + 90 * Math.sin(a1)).toFixed(1) +
+         "L" + (50 + 90 * Math.cos(a2)).toFixed(1) + " " + (50 + 90 * Math.sin(a2)).toFixed(1) + "Z";
+  }
+  return d;
+})();
+
+const avatarCache = {};
+
+// Avatar superhero orisinal (6 gaya, 4 lambang dada). Warna kostum, jubah, dan gaya ditentukan dari nama,
+// sehingga tampilannya selalu sama untuk nama yang sama. Murni SVG inline: tampil sama di Android, iOS, dan Mac.
 function avatarSvg(name) {
-  const h = nameHue(name);
-  const seed = nameSeed(name);
+  const key = String(name);
+  if (avatarCache[key]) return avatarCache[key];
+
+  const h = nameHue(key);
+  const seed = nameSeed(key);
   const skin = AVATAR_SKIN[seed % AVATAR_SKIN.length];
   const hair = AVATAR_HAIR[(seed >>> 4) % AVATAR_HAIR.length];
-  const style = (seed >>> 8) % 5; // 0 hijab, 1 rambut panjang, 2 rambut pendek, 3 pendek berkacamata, 4 ikal
-  const bg = "hsl(" + h + " 40% 92%)";
-  const cloth = "hsl(" + h + " 40% 46%)";
-  const clothDark = "hsl(" + h + " 40% 32%)";
-  const scarf = "hsl(" + ((h + 150) % 360) + " 42% 52%)";
-  const ink = "#2b2118";
+  const style = (seed >>> 7) % 6;
+  const emblem = (seed >>> 11) % 4;
 
-  const body =
-    '<path d="M10 100C12 84 28 76 50 76S88 84 90 100Z" fill="' + cloth + '"/>' +
-    '<path d="M42 77L50 88L58 77" fill="none" stroke="' + clothDark + '" stroke-width="2" stroke-linejoin="round"/>';
-  const neck = '<rect x="44" y="64" width="12" height="16" rx="5" fill="' + skin + '"/>';
+  const ink = "#2b2118", gold = "#ffc93c", smile = "#8a4a3b";
+  const suit = "hsl(" + h + " 62% 46%)";
+  const suitDark = "hsl(" + h + " 62% 31%)";
+  const suitLight = "hsl(" + h + " 72% 64%)";
+  const h2 = (h + 150) % 360;
+  const cape = "hsl(" + h2 + " 70% 46%)";
+  const capeDark = "hsl(" + h2 + " 70% 30%)";
+  const bg = "hsl(" + h + " 72% 91%)";
+  const burst = "hsl(" + h + " 78% 83%)";
+  const o = ' stroke="' + ink + '" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
+  const o2 = ' stroke="' + ink + '" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"';
 
-  let back = "";
+  // Jubah (di belakang tubuh)
+  const capeSvg =
+    '<path d="M25 77C11 83 4 93 2 100L98 100C96 93 89 83 75 77Z" fill="' + cape + '"' + o + '/>' +
+    '<path d="M25 77C16 84 12 92 10 100L24 100C26 92 27 84 31 79Z" fill="' + capeDark + '"/>' +
+    '<path d="M75 77C84 84 88 92 90 100L76 100C74 92 73 84 69 79Z" fill="' + capeDark + '"/>';
+
+  // Tubuh + lambang dada
+  const bodySvg = '<path d="M14 100C16 85 30 77 50 77S84 85 86 100Z" fill="' + suit + '"' + o + '/>';
+  let emblemSvg;
+  if (emblem === 0) emblemSvg = '<polygon points="' + starPoints(50, 91, 7.5, 3.2) + '" fill="' + gold + '"' + o2 + '/>';
+  else if (emblem === 1) emblemSvg = '<circle cx="50" cy="91" r="6.5" fill="' + gold + '"' + o2 + '/><circle cx="50" cy="91" r="2.4" fill="' + suit + '"/>';
+  else if (emblem === 2) emblemSvg = '<polygon points="50,83 58,91 50,99 42,91" fill="' + gold + '"' + o2 + '/>';
+  else emblemSvg = '<polygon points="50,83 58.5,98 41.5,98" fill="' + gold + '"' + o2 + '/>';
+
+  const neck = (color) => '<rect x="43.5" y="62" width="13" height="17" rx="4.5" fill="' + color + '"' + o2 + '/>';
+  const eyes = (y) =>
+    '<ellipse cx="42" cy="' + y + '" rx="4.4" ry="2.8" fill="#fff"/><ellipse cx="58" cy="' + y + '" rx="4.4" ry="2.8" fill="#fff"/>' +
+    '<circle cx="42.8" cy="' + y + '" r="1.7" fill="' + ink + '"/><circle cx="58.8" cy="' + y + '" r="1.7" fill="' + ink + '"/>';
+  const grin = (y) => '<path d="M44 ' + y + 'Q50 ' + (y + 5) + ' 56 ' + y + '" fill="none" stroke="' + smile + '" stroke-width="2.2" stroke-linecap="round"/>';
+  const face = '<ellipse cx="50" cy="46" rx="19" ry="21" fill="' + skin + '"' + o + '/>';
+
+  let head;
   if (style === 0) {
-    back = '<ellipse cx="50" cy="46" rx="31" ry="34" fill="' + scarf + '"/>';
+    // Topeng domino + rambut
+    head = neck(skin) + face +
+      '<path d="M31 44C30 26 41 22 50 22S70 26 69 44C64 36 58 33 50 33S36 36 31 44Z" fill="' + hair + '"' + o + '/>' +
+      '<path d="M31 47C36 41 44 41 50 44C56 41 64 41 69 47C67 54 60 55 56 52C53 50 47 50 44 52C40 55 33 54 31 47Z" fill="' + suit + '"' + o + '/>' +
+      eyes(47.5) + grin(59);
   } else if (style === 1) {
-    back = '<path d="M25 46Q22 16 50 16T75 46L79 88Q50 96 21 88Z" fill="' + hair + '"/>';
+    // Helm berkaca pelindung
+    head = neck(suit) + face +
+      '<path d="M29 48C28 25 40 18 50 18S72 25 71 48L71 53C66 53 63 50 62 50L38 50C37 50 34 53 29 53Z" fill="' + suit + '"' + o + '/>' +
+      '<path d="M50 19L50 36" stroke="' + suitLight + '" stroke-width="4.5" stroke-linecap="round"/>' +
+      '<rect x="32" y="37" width="36" height="13" rx="6.5" fill="#22313f"' + o2 + '/>' +
+      '<rect x="34.5" y="39.5" width="31" height="8" rx="4" fill="#5fe3ff"/>' +
+      '<rect x="37" y="41" width="9" height="2.2" rx="1.1" fill="#fff" opacity=".85"/>' +
+      '<circle cx="29" cy="47" r="4.2" fill="' + suitDark + '"' + o2 + '/><circle cx="71" cy="47" r="4.2" fill="' + suitDark + '"' + o2 + '/>' +
+      grin(60);
+  } else if (style === 2) {
+    // Tudung penuh (cowl) bermata putih bersudut
+    head = neck(suit) +
+      '<ellipse cx="50" cy="46" rx="20" ry="22" fill="' + suit + '"' + o + '/>' +
+      '<path d="M36 51C40 47 60 47 64 51C64 61 58 67 50 67C42 67 36 61 36 51Z" fill="' + skin + '"' + o2 + '/>' +
+      '<path d="M35 43L47 46L45 51L36 49Z" fill="#fff"' + o2 + '/><path d="M65 43L53 46L55 51L64 49Z" fill="#fff"' + o2 + '/>' +
+      '<circle cx="42" cy="47.5" r="1.6" fill="' + ink + '"/><circle cx="58" cy="47.5" r="1.6" fill="' + ink + '"/>' +
+      '<polygon points="' + starPoints(50, 31, 5.5, 2.4) + '" fill="' + gold + '"' + o2 + '/>' + grin(60);
+  } else if (style === 3) {
+    // Hijab pahlawan + topeng
+    head = neck(suit) +
+      '<path d="M25 52C21 24 38 13 50 13S79 24 75 52C75 67 64 73 50 73S25 67 25 52Z" fill="' + suit + '"' + o + '/>' +
+      '<ellipse cx="50" cy="47" rx="15.5" ry="17.5" fill="' + skin + '"' + o2 + '/>' +
+      '<path d="M34.5 46C39 41 45 41 50 44C55 41 61 41 65.5 46C63 52 57 53 54 51C52 49 48 49 46 51C43 53 37 52 34.5 46Z" fill="' + cape + '"' + o2 + '/>' +
+      eyes(47) + '<polygon points="' + starPoints(50, 28.5, 5.2, 2.2) + '" fill="' + gold + '"' + o2 + '/>' + grin(58.5);
   } else if (style === 4) {
-    back = '<circle cx="28" cy="38" r="10" fill="' + hair + '"/>' +
-           '<circle cx="50" cy="27" r="12" fill="' + hair + '"/>' +
-           '<circle cx="72" cy="38" r="10" fill="' + hair + '"/>';
-  }
-
-  const face =
-    '<ellipse cx="50" cy="48" rx="21" ry="23" fill="' + skin + '"/>' +
-    '<ellipse cx="42" cy="50" rx="3.2" ry="4" fill="' + ink + '"/>' +
-    '<ellipse cx="58" cy="50" rx="3.2" ry="4" fill="' + ink + '"/>' +
-    '<circle cx="43.2" cy="48.4" r="1.1" fill="#fff"/>' +
-    '<circle cx="59.2" cy="48.4" r="1.1" fill="#fff"/>' +
-    '<ellipse cx="35.5" cy="58" rx="4" ry="2.4" fill="#e8948a" opacity=".5"/>' +
-    '<ellipse cx="64.5" cy="58" rx="4" ry="2.4" fill="#e8948a" opacity=".5"/>' +
-    '<path d="M45.5 61Q50 65 54.5 61" fill="none" stroke="#8a4a3b" stroke-width="1.8" stroke-linecap="round"/>';
-
-  let front = "";
-  if (style === 0) {
-    front = '<path d="M29 45Q31 25 50 25T71 45Q66 34 50 34T29 45Z" fill="' + scarf + '"/>';
-  } else if (style === 1 || style === 2 || style === 3) {
-    front = '<path d="M27 45Q24 19 50 19T73 45Q66 31 50 32T27 45Z" fill="' + hair + '"/>';
+    // Ninja pahlawan: ikat kepala + penutup mulut
+    head = neck(suit) + face +
+      '<path d="M31 52C40 54 60 54 69 52C69 63 60 69 50 69C40 69 31 63 31 52Z" fill="' + suitDark + '"' + o2 + '/>' +
+      '<path d="M30 46C28 24 40 18 50 18S72 24 70 46C66 40 58 38 50 38S34 40 30 46Z" fill="' + suit + '"' + o + '/>' +
+      '<path d="M29.5 34H70.5V42H29.5Z" fill="' + gold + '"' + o2 + '/>' +
+      '<path d="M70 36L83 30L80 42Z" fill="' + gold + '"' + o2 + '/>' +
+      eyes(47.8);
   } else {
-    front = '<path d="M29 44Q32 33 50 33T71 44Q62 37 50 38T29 44Z" fill="' + hair + '"/>';
+    // Pilot pahlawan: topi kulit + kacamata pelindung + syal
+    head = neck(skin) + face +
+      '<path d="M30 46C28 24 40 17 50 17S72 24 70 46C66 39 58 36 50 36S34 39 30 46Z" fill="' + suitDark + '"' + o + '/>' +
+      '<circle cx="29.5" cy="49" r="4.4" fill="' + suit + '"' + o2 + '/><circle cx="70.5" cy="49" r="4.4" fill="' + suit + '"' + o2 + '/>' +
+      '<path d="M30 46H70" stroke="' + ink + '" stroke-width="4.4" stroke-linecap="round"/>' +
+      '<circle cx="42" cy="46" r="8.6" fill="' + ink + '"/><circle cx="42" cy="46" r="7" fill="' + gold + '"/><circle cx="42" cy="46" r="5.2" fill="#7fe8ff"/>' +
+      '<circle cx="58" cy="46" r="8.6" fill="' + ink + '"/><circle cx="58" cy="46" r="7" fill="' + gold + '"/><circle cx="58" cy="46" r="5.2" fill="#7fe8ff"/>' +
+      '<circle cx="40" cy="44" r="1.7" fill="#fff" opacity=".9"/><circle cx="56" cy="44" r="1.7" fill="#fff" opacity=".9"/>' +
+      '<path d="M60 70L69 88L57 83Z" fill="' + cape + '"' + o2 + '/>' +
+      '<path d="M33 66C43 73 57 73 67 66L70 75C57 81 43 81 30 75Z" fill="' + cape + '"' + o + '/>' +
+      grin(59.5);
   }
 
-  const glasses = style === 3
-    ? '<circle cx="42" cy="50" r="6.2" fill="none" stroke="' + ink + '" stroke-width="1.4"/>' +
-      '<circle cx="58" cy="50" r="6.2" fill="none" stroke="' + ink + '" stroke-width="1.4"/>' +
-      '<path d="M48.2 50H51.8" stroke="' + ink + '" stroke-width="1.4"/>'
-    : "";
-
-  return '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
+  const svg =
+    '<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">' +
     '<rect width="100" height="100" fill="' + bg + '"/>' +
-    body + neck + back + face + front + glasses +
+    '<path d="' + AVATAR_BURST + '" fill="' + burst + '"/>' +
+    capeSvg + bodySvg + emblemSvg + head +
     "</svg>";
+  avatarCache[key] = svg;
+  return svg;
 }
 
 function renderMessages(newIndex = -1) {
