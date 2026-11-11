@@ -951,6 +951,27 @@ initGallerySliders();
     });
   }
 
+  /* 14a-2. Hashtag: pecah per huruf agar muncul bergantian lalu berkilau bergelombang */
+  function splitHashtags() {
+    document.querySelectorAll(".hashtag").forEach((tag) => {
+      if (tag.dataset.split) return;
+      tag.dataset.split = "1";
+      let i = 0;
+      tag.querySelectorAll(".ht-seg").forEach((seg) => {
+        const text = seg.textContent;
+        seg.textContent = "";
+        Array.from(text).forEach((ch) => {
+          const span = document.createElement("span");
+          span.className = "ht-ch";
+          span.style.setProperty("--i", i++);
+          span.textContent = ch;
+          seg.appendChild(span);
+        });
+      });
+      tag.classList.add("is-split");
+    });
+  }
+
   /* 14b. Debu emas melayang di cover dan bagian penutup */
   function addDust() {
     if (REDUCE) return;
@@ -1062,6 +1083,7 @@ initGallerySliders();
   }
 
   safe(splitHeadings);
+  safe(splitHashtags);
   safe(addDust);
   safe(initScrollMotion);
   safe(initRipple);

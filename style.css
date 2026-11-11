@@ -1442,3 +1442,77 @@ html.lb-open body > :not(.lb) * { animation-play-state: paused !important; }
   .lb-backdrop, .lb-btn { transition: none; }
   .lb-btn { transform: none; }
 }
+
+/* --- 30. HASHTAG #berumahtANGGAsamaTHASYA (countdown + penutup) --- */
+.hashtag {
+  --ht-base: var(--gold); --ht-key: #856742; --ht-hi: #c99a4e; --ht-glow: rgba(214, 170, 90, .55);
+  position: relative; display: block; max-width: 100%; margin: 18px auto 0; padding: 0 4px;
+  text-align: center; white-space: nowrap;
+  font-family: var(--serif); font-style: italic; font-weight: 500; line-height: 1.25;
+  font-size: clamp(14px, 4.2vw, 24px); letter-spacing: .02em; color: var(--ht-base);
+  -webkit-text-size-adjust: 100%;
+}
+.date-script.hashtag { transition-delay: 0s; }
+.hashtag .ht-seg { display: inline-block; }
+.hashtag .ht-key { position: relative; font-style: normal; font-weight: 700; letter-spacing: .1em; color: var(--ht-key); }
+
+/* garis emas tipis di bawah hashtag, tumbuh dari tengah */
+.hashtag::after {
+  content: ""; display: block; width: min(120px, 40%); height: 1px; margin: 11px auto 0;
+  background: linear-gradient(90deg, transparent, var(--ht-hi), transparent);
+  transform: scaleX(0); transition: transform 1.3s var(--ease-out) 1.5s;
+}
+.hashtag.is-visible::after { transform: scaleX(1); }
+
+/* huruf muncul satu per satu (hanya bila skrip sudah memecah teks) */
+.hashtag.is-split .ht-ch {
+  display: inline-block; opacity: 0; filter: blur(6px);
+  transform: translate3d(0, .6em, 0) scale(.9);
+  transition: opacity .8s var(--ease-out), transform .8s var(--ease-out), filter .8s var(--ease-out);
+  transition-delay: calc(var(--i, 0) * 45ms + 250ms);
+}
+.date-script.hashtag.is-split .ht-ch { transition-delay: calc(var(--i, 0) * 45ms + 650ms); }
+.hashtag.is-visible .ht-ch { opacity: 1; filter: blur(0); transform: none; }
+
+/* kilau bergelombang: cahaya emas berjalan dari huruf pertama ke terakhir, berulang */
+.hashtag.is-split .ht-ch {
+  animation: htWave 5.8s ease-in-out infinite;
+  animation-delay: calc(var(--i, 0) * 75ms + 3s);
+  animation-play-state: paused;
+}
+.page.in-view .hashtag.is-visible .ht-ch { animation-play-state: running; }
+@keyframes htWave {
+  0%, 46%, 100% { color: inherit; text-shadow: 0 0 0 rgba(255, 255, 255, 0); translate: 0 0; }
+  22% { color: var(--ht-hi); text-shadow: 0 0 14px var(--ht-glow); translate: 0 -.09em; }
+}
+
+/* bintang kecil berkelip di huruf terakhir kata kunci (ANGGA dan THASYA) */
+.hashtag .ht-key::after {
+  content: "✦"; position: absolute; top: -.5em; right: -.2em; font-size: .46em; font-style: normal; font-weight: 400;
+  color: var(--ht-hi); opacity: 0; pointer-events: none;
+  animation: htTwinkle 3.8s ease-in-out infinite; animation-play-state: paused;
+}
+.hashtag .ht-key + .ht-seg + .ht-key::after { animation-delay: 1.6s; }
+.page.in-view .hashtag.is-visible .ht-key::after { animation-play-state: running; }
+@keyframes htTwinkle {
+  0%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); }
+  45% { opacity: 1; transform: scale(1) rotate(90deg); }
+  70% { opacity: 0; transform: scale(.6) rotate(150deg); }
+}
+
+/* tampilan di panel penutup (latar gelap) */
+.hashtag.final-hashtag { --ht-base: #dcc9ae; --ht-key: #f1dcb4; --ht-hi: #fff1cf; --ht-glow: rgba(255, 232, 186, .65); margin: clamp(28px, 4.4vh, 40px) auto clamp(22px, 3.4vh, 34px); font-size: clamp(13px, 3.5vw, 20px); }
+
+@media (min-width: 701px) { .hashtag { margin-top: 20px; } }
+@media (max-width: 360px) { .hashtag.final-hashtag { font-size: 13px; } }
+@media (max-width: 360px) { .hashtag { font-size: 14px; padding: 0; } }
+@media (hover: none), (pointer: coarse) {
+  .hashtag.is-split .ht-ch { filter: blur(3px); }
+  .hashtag.is-split.is-visible .ht-ch { filter: blur(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hashtag.is-split .ht-ch { opacity: 1; filter: none; transform: none; transition: none; animation: none; }
+  .hashtag::after { transform: scaleX(1); transition: none; }
+  .hashtag .ht-key::after { display: none; }
+}
