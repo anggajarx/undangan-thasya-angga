@@ -8,8 +8,8 @@
 # Hasil: undangan-nikah-04122026/<nama-folder>/index.html untuk setiap tamu.
 # Yang diunggah ke GitHub: folder undangan-nikah-04122026 (bersama
 # index.html, style.css, script.js, assets, CNAME di root).
-# JANGAN unggah template.html dan generate.sh: keduanya memuat daftar tamu
-# dan isi template yang tidak perlu bisa dibuka publik.
+# JANGAN unggah template.html, generate.sh, tidak-tersedia.html, dan daftar-link.txt:
+# semuanya hanya untuk komputer Anda (memuat daftar tamu).
 # =====================================================================
 
 set -u
@@ -18,6 +18,63 @@ set -u
 # Format: "nama-folder|Nama Tamu yang Tampil"
 # nama-folder: huruf kecil, angka, dan tanda hubung saja.
 DAFTAR_TAMU=(
+  # --- Tamu sebelumnya (Kelompok 1-3, 56 tamu; link sudah dibagikan, jangan ubah nama folder) ---
+  "nisram-beserta-pasangan|Nisram beserta Pasangan"
+  "afiifa|Afiifa"
+  "zaidan|Zaidan"
+  "wulan-beserta-pasangan|Wulan beserta Pasangan"
+  "keluarga-besar-mbah-bawi|Keluarga Besar Mbah Bawi"
+  "keluarga-besar-mbah-soeroredjo|Keluarga Besar Mbah Soeroredjo"
+  "warga-besar-rt-011|Warga Besar RT 011"
+  "keluarga-besar-opung|Keluarga Besar Opung"
+  "om-ucok-beserta-istri|Om Ucok beserta Istri"
+  "mas-rikie-beserta-istri|Mas Rikie beserta Istri"
+  "mas-teguh-dan-istri|Mas Teguh beserta Istri"
+  "fachri-dan-istri|Fachri beserta Istri"
+  "aji-dan-istri|Aji beserta Istri"
+  "ario-dan-istri|Ario beserta Istri"
+  "hajah-asnil|Hajah Asnil"
+  "ibu-ida|Ibu Ida"
+  "uwa-awang|Uwa Awang"
+  "hajah-nana|Hajah Nana"
+  "hajah-mulyawati|Hajah Mulyawati"
+  "ibu-giska|Ibu Giska"
+  "ibu-tiara|Ibu Tiara"
+  "bapak-hanif|Bapak Hanif"
+  "rifki|Rifki"
+  "ibu-yola|Ibu Yola"
+  "bapak-adi|Bapak Adi"
+  "ibu-tia|Ibu Tia"
+  "meli|Meli"
+  "septi|Septi"
+  "irfan|Irfan"
+  "hajah-ai|Hajah Ai"
+  "bapak-iman|Bapak Iman"
+  "bapak-deni|Bapak Deni"
+  "ibu-mira|Ibu Mira"
+  "ibu-ria|Ibu Ria"
+  "bapak-deden|Bapak Deden"
+  "bapak-mamat|Bapak Mamat"
+  "bapak-usuf|Bapak Usuf"
+  "ibu-ipa|Ibu Ipa"
+  "ibu-irma|Ibu Irma"
+  "bapak-sidik|Bapak Sidik"
+  "ibu-ade|Ibu Ade"
+  "bapak-dady|Bapak Dady"
+  "nok|Nok"
+  "ibu-ade-juji|Ibu Ade Juji"
+  "ibu-anggi|Ibu Anggi"
+  "eyang|Eyang"
+  "mama-widi|Mama Widi"
+  "bapak-dadang|Bapak Dadang"
+  "ibu-neni|Ibu Neni"
+  "bapak-irfan|Bapak Irfan"
+  "bapak-diden|Bapak Diden"
+  "ibu-feli|Ibu Feli"
+  "ibu-qiqi|Ibu Qiqi"
+  "bapak-hilman|Bapak Hilman"
+  "ibu-maya|Ibu Maya"
+  "ibu-dimas|Ibu Dimas"
   # --- Tamu Angga (33 Tamu) ---
   "yoanita-beserta-suami|Yoanita beserta Suami"
   "angga-beserta-istri|Angga beserta Istri"
@@ -43,9 +100,14 @@ TEMPLATE="template.html"
 TARGET_DIR="undangan-nikah-04122026"
 # Alamat situs (untuk daftar link di akhir)
 BASE_URL="https://thasyaanggawedding.web.id"
-# Halaman umum tanpa nama tamu: /undangan-nikah-04122026/  ("ya" atau "tidak")
-BUAT_HALAMAN_UMUM="ya"
+# Isi alamat tanpa nama tamu: /undangan-nikah-04122026/
+#   "tidak-tersedia" = tampil "Halaman Tidak Tersedia" (undangan hanya bisa dibuka lewat link tamu)  <- disarankan
+#   "tamu"           = tampil undangan dengan nama NAMA_HALAMAN_UMUM
+#   "tidak"          = tidak membuat halaman (GitHub menampilkan 404)
+HALAMAN_UMUM="tidak-tersedia"
 NAMA_HALAMAN_UMUM="Tamu Undangan"
+# File halaman "Halaman Tidak Tersedia" (harus berada di folder yang sama dengan generate.sh)
+FILE_TIDAK_TERSEDIA="tidak-tersedia.html"
 
 PLACEHOLDER="TAMU_UNDANGAN"
 
@@ -61,6 +123,23 @@ FILE_DAFTAR_LINK="daftar-link.txt"
 if [ ! -f "$TEMPLATE" ]; then
   echo "GAGAL: $TEMPLATE tidak ditemukan di folder ini ($(pwd))."
   exit 1
+fi
+
+case "$HALAMAN_UMUM" in
+  tamu|tidak-tersedia|tidak) ;;
+  *) echo "GAGAL: HALAMAN_UMUM harus 'tidak-tersedia', 'tamu', atau 'tidak' (sekarang: '$HALAMAN_UMUM')."; exit 1 ;;
+esac
+if [ "$HALAMAN_UMUM" = "tidak-tersedia" ]; then
+  if [ ! -f "$FILE_TIDAK_TERSEDIA" ]; then
+    echo "GAGAL: $FILE_TIDAK_TERSEDIA tidak ditemukan di folder ini ($(pwd))."
+    echo "       Letakkan file 'Halaman Tidak Tersedia' di sini, atau ubah HALAMAN_UMUM."
+    exit 1
+  fi
+  if ! grep -q "Halaman Tidak Tersedia" "$FILE_TIDAK_TERSEDIA" || grep -q "guestName" "$FILE_TIDAK_TERSEDIA"; then
+    echo "GAGAL: $FILE_TIDAK_TERSEDIA bukan halaman 'Halaman Tidak Tersedia' yang benar."
+    echo "       (Mungkin file undangan tamu yang tertukar.)"
+    exit 1
+  fi
 fi
 
 # Template lama masih memuat penulisan tanggal tidak formal ("Jum'at", "04 Desember").
@@ -102,6 +181,13 @@ buat_halaman() {
     echo "GAGAL: placeholder masih tersisa di $folder_path/index.html"
     exit 1
   fi
+}
+
+buat_halaman_tidak_tersedia() {
+  local stempel
+  stempel="<!-- generate.sh | halaman umum: tidak tersedia | $(date '+%Y-%m-%d %H:%M') -->"
+  mkdir -p "$TARGET_DIR"
+  awk -v s="$stempel" '{ print } !d && /<head>/ { print "  " s; d = 1 }' "$FILE_TIDAK_TERSEDIA" > "$TARGET_DIR/index.html"
 }
 
 # ---------------------------------------------------------------------
@@ -146,9 +232,14 @@ fi
 
 mkdir -p "$TARGET_DIR"
 
-if [ "$BUAT_HALAMAN_UMUM" = "ya" ]; then
+if [ "$HALAMAN_UMUM" = "tamu" ]; then
   buat_halaman "$TARGET_DIR" "$NAMA_HALAMAN_UMUM"
   echo "Berhasil membuat: $TARGET_DIR/index.html (halaman umum: $NAMA_HALAMAN_UMUM)"
+elif [ "$HALAMAN_UMUM" = "tidak-tersedia" ]; then
+  buat_halaman_tidak_tersedia
+  echo "Berhasil membuat: $TARGET_DIR/index.html (Halaman Tidak Tersedia)"
+else
+  echo "Halaman umum tidak dibuat (HALAMAN_UMUM=tidak)."
 fi
 
 JUMLAH=0
@@ -174,8 +265,12 @@ periksa() {
     echo "  SALAH: nama di $file tidak sesuai (seharusnya: $nama)"; GALAT=1
   fi
 }
-if [ "$BUAT_HALAMAN_UMUM" = "ya" ]; then
+if [ "$HALAMAN_UMUM" = "tamu" ]; then
   periksa "$TARGET_DIR/index.html" "$NAMA_HALAMAN_UMUM"
+elif [ "$HALAMAN_UMUM" = "tidak-tersedia" ]; then
+  if [ ! -f "$TARGET_DIR/index.html" ] || ! grep -q "Halaman Tidak Tersedia" "$TARGET_DIR/index.html" || grep -q "guestName" "$TARGET_DIR/index.html"; then
+    echo "  SALAH: $TARGET_DIR/index.html bukan 'Halaman Tidak Tersedia'"; GALAT=1
+  fi
 fi
 for item in "${DAFTAR_TAMU[@]}"; do
   item="${item%$'\r'}"
