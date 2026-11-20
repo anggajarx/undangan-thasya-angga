@@ -1451,7 +1451,8 @@ html.lb-open body > :not(.lb) * { animation-play-state: paused !important; }
   position: relative; isolation: isolate;
   width: -moz-fit-content; width: fit-content; max-width: 100%; margin: 26px auto 0; padding: 14px 6px 20px;
   text-align: center; text-transform: none; overflow-wrap: anywhere;
-  font-family: var(--serif); font-weight: 600; font-size: min(5.6vw, 28px); line-height: 1.3; letter-spacing: .02em;
+  font-family: var(--serif); font-weight: 600; line-height: 1.3; letter-spacing: .02em;
+  font-size: 17px; font-size: clamp(14px, calc(2.4vw + 8px), 28px); /* ponsel sekitar 16-19px, layar lebar maksimum 28px */
   -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
   -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
 }
